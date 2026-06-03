@@ -261,6 +261,38 @@
   }
   .ux-done-toggle input { width: auto; cursor: pointer; }
 
+  /* Audit log panel */
+  #audit-panel {
+    position: fixed; top: 0; right: -420px; width: 400px; height: 100vh;
+    background: #fff; box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+    z-index: 150; display: flex; flex-direction: column;
+    transition: right 0.25s ease;
+  }
+  #audit-panel.open { right: 0; }
+  .audit-header {
+    padding: 16px 20px; border-bottom: 1px solid #eee;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .audit-header h3 { font-size: 14px; font-weight: 600; }
+  .audit-close { background: none; border: none; cursor: pointer; font-size: 18px; color: #aaa; }
+  .audit-close:hover { color: #333; }
+  .audit-list { flex: 1; overflow-y: auto; padding: 12px 0; }
+  .audit-item {
+    padding: 10px 20px; border-bottom: 1px solid #f5f5f5;
+    display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: start;
+  }
+  .audit-item:hover { background: #fafafa; }
+  .audit-avatar {
+    width: 28px; height: 28px; border-radius: 50%; background: #FF6B35;
+    color: #fff; font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+  }
+  .audit-body { font-size: 12px; }
+  .audit-who { font-weight: 600; color: #333; }
+  .audit-what { color: #666; }
+  .audit-when { color: #bbb; font-size: 11px; margin-top: 2px; }
+  .audit-empty { padding: 40px 20px; text-align: center; color: #ccc; font-size: 13px; }
+
   /* Lock screen */
   #lock-screen {
     position: fixed; inset: 0; background: #f0f0f0;
@@ -270,14 +302,14 @@
   .lock-card {
     background: #fff; border-radius: 16px; padding: 40px 48px;
     box-shadow: 0 8px 40px rgba(0,0,0,0.1);
-    text-align: center; width: 320px;
+    text-align: center; width: 340px;
   }
   .lock-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
   .lock-card p  { font-size: 13px; color: #888; margin-bottom: 24px; }
   .lock-card input {
     width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px;
-    font-size: 16px; text-align: center; letter-spacing: 4px; outline: none;
-    font-family: inherit; margin-bottom: 12px;
+    font-size: 14px; outline: none; font-family: inherit; margin-bottom: 12px;
+    box-sizing: border-box;
   }
   .lock-card input:focus { border-color: #FF6B35; }
   .lock-card button {
@@ -286,24 +318,38 @@
     cursor: pointer; font-family: inherit;
   }
   .lock-card button:hover { background: #e55a25; }
-  .lock-error { color: #e74c3c; font-size: 12px; margin-top: 8px; display:none; }
+  .lock-card button:disabled { background: #ccc; cursor: default; }
+  .lock-msg { font-size: 12px; margin-top: 10px; display:none; }
+  .lock-msg.error { color: #e74c3c; }
+  .lock-msg.success { color: #27ae60; }
 </style>
 </head>
 <body>
 
 <div id="lock-screen">
   <div class="lock-card">
-    <div style="font-size:36px;margin-bottom:16px;">🔒</div>
+    <div style="font-size:36px;margin-bottom:16px;">📅</div>
     <h2>UX Roadmap H2 2026</h2>
-    <p>Enter the password to access</p>
-    <input id="lock-input" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')unlock()">
-    <button onclick="unlock()">Access</button>
-    <div class="lock-error" id="lock-error">Incorrect password</div>
+    <p>Enter your name and the access password</p>
+    <input id="lock-name" type="text" placeholder="Your name (e.g. Miguel)" onkeydown="if(event.key==='Enter')document.getElementById('lock-input').focus()" style="margin-bottom:8px;">
+    <input id="lock-input" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')unlock()">
+    <button id="lock-btn" onclick="unlock()">Access</button>
+    <div class="lock-msg" id="lock-msg"></div>
+  </div>
+</div>
+
+<div id="audit-panel">
+  <div class="audit-header">
+    <h3>Activity log</h3>
+    <button class="audit-close" onclick="toggleAuditLog()">✕</button>
+  </div>
+  <div class="audit-list" id="audit-list">
+    <div class="audit-empty">Loading...</div>
   </div>
 </div>
 
 <div class="app-header">
-  <h1>📅 Roadmap H2 2026</h1>
+  <h1 style="cursor:pointer;" onclick="toggleAuditLog()" title="Click to view activity log">📅 Roadmap H2 2026</h1>
   <div class="header-actions">
     <button class="btn btn-secondary" onclick="exportHint()">⬇ Export</button>
     <button class="btn btn-primary" onclick="openAddProject(null)">+ Add project</button>
@@ -465,35 +511,65 @@ let state = {
 };
 
 // ── AUTH ──
-const PASSWORD_HASH = 'glopi2016'; // change this to your password
+const ACCESS_PASSWORD = 'glopi2016';
+let currentUser = null;
 
-async function unlock() {
-  const input = document.getElementById('lock-input').value;
-  // Simple hash check using Web Crypto
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
-
-  const correctBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(PASSWORD_HASH));
-  const correctHex = Array.from(new Uint8Array(correctBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
-
-  if (hashHex === correctHex) {
-    sessionStorage.setItem('roadmap-auth', '1');
-    document.getElementById('lock-screen').style.display = 'none';
-  } else {
-    const err = document.getElementById('lock-error');
-    err.style.display = 'block';
-    document.getElementById('lock-input').value = '';
-    document.getElementById('lock-input').focus();
-    setTimeout(() => err.style.display = 'none', 2000);
-  }
+function showMsg(text, type) {
+  const el = document.getElementById('lock-msg');
+  el.textContent = text; el.className = 'lock-msg ' + type; el.style.display = 'block';
 }
 
-if (sessionStorage.getItem('roadmap-auth') === '1') {
+async function unlock() {
+  const name = document.getElementById('lock-name').value.trim();
+  const pwd  = document.getElementById('lock-input').value;
+
+  if (!name) { showMsg('Please enter your name.', 'error'); document.getElementById('lock-name').focus(); return; }
+  if (pwd !== ACCESS_PASSWORD) {
+    showMsg('Incorrect password.', 'error');
+    document.getElementById('lock-input').value = '';
+    document.getElementById('lock-input').focus(); return;
+  }
+
+  currentUser = { name };
+  sessionStorage.setItem('roadmap-user', name);
   document.getElementById('lock-screen').style.display = 'none';
-} else {
-  setTimeout(() => document.getElementById('lock-input').focus(), 100);
+  showUserBadge(name);
+
+  if (sb) await sb.from('audit_log').insert({ user_email: name, action: 'login', entity_type: null, entity_name: null });
+
+}
+
+function signOut() {
+  currentUser = null;
+  sessionStorage.removeItem('roadmap-user');
+  document.getElementById('user-badge')?.remove();
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('lock-input').value = '';
+  document.getElementById('lock-msg').style.display = 'none';
+  setTimeout(() => document.getElementById('lock-name').focus(), 100);
+}
+
+function showUserBadge(name) {
+  let badge = document.getElementById('user-badge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'user-badge';
+    badge.style.cssText = 'font-size:12px;color:#888;display:flex;align-items:center;gap:8px;';
+    badge.innerHTML = `<span id="user-name-label"></span><button onclick="signOut()" style="background:none;border:1px solid #ddd;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:11px;color:#999;">Sign out</button>`;
+    document.querySelector('.header-actions').prepend(badge);
+  }
+  document.getElementById('user-name-label').textContent = name;
+}
+
+async function initAuth() {
+  const saved = sessionStorage.getItem('roadmap-user');
+  if (saved) {
+    currentUser = { name: saved };
+    document.getElementById('lock-screen').style.display = 'none';
+    showUserBadge(saved);
+  } else {
+    setTimeout(() => document.getElementById('lock-name')?.focus(), 100);
+  }
 }
 
 // ── SUPABASE ──
@@ -516,12 +592,25 @@ function showSaveStatus(msg, color) {
   clearTimeout(el._t); el._t = setTimeout(() => el.textContent = '', 3000);
 }
 
-async function saveState() {
+async function saveState(auditAction, auditEntity, auditName) {
   if (!sb) { showSaveStatus('⚠ Supabase not connected', '#e67e22'); return; }
   showSaveStatus('Saving...', '#aaa');
   const { error } = await sb.from('roadmap_state').upsert({ id: 1, state, updated_at: new Date().toISOString() });
-  if (error) { showSaveStatus('✗ Error: ' + error.message, '#e74c3c'); console.error(error); }
-  else { showSaveStatus('✓ Saved', '#2ecc71'); }
+  if (error) { showSaveStatus('✗ Error: ' + error.message, '#e74c3c'); console.error(error); return; }
+  showSaveStatus('✓ Saved', '#2ecc71');
+
+  // Audit log
+  const userName = currentUser?.name || currentUser?.email || null;
+  console.log('[audit]', { userName, auditAction, auditEntity, auditName });
+  if (userName && auditAction) {
+    const { error: auditErr } = await sb.from('audit_log').insert({
+      user_email: userName,
+      action: auditAction,
+      entity_type: auditEntity || null,
+      entity_name: auditName || null,
+    });
+    if (auditErr) console.error('[audit error]', auditErr);
+  }
 }
 
 let activeFilters = { group: '', owner: '' };
@@ -665,7 +754,7 @@ function render() {
       const toIdx   = state.teams.findIndex(t => t.id === toId);
       const [moved] = state.teams.splice(fromIdx, 1);
       state.teams.splice(toIdx, 0, moved);
-      saveState(); render();
+      saveState('team_reordered', 'team', moved.name); render();
     });
 
     const teamRow = document.createElement('div');
@@ -863,7 +952,7 @@ function createBar(project, phase) {
       e.preventDefault(); e.stopPropagation();
       const proj = state.projects.find(p => p.id === project.id);
       proj.uxDone = !proj.uxDone;
-      saveState(); render();
+      saveState('ux_done_toggled', 'project', proj.name); render();
     });
   }
 
@@ -912,7 +1001,7 @@ function setupDrag(bar, project, phase) {
 
       bar.removeEventListener('pointermove', onMove);
       bar.removeEventListener('pointerup', onUp);
-      saveState();
+      saveState('bar_moved', 'project', proj.name);
       render();
     };
 
@@ -944,7 +1033,7 @@ function setupResize(handle, bar, project, phase) {
       if (phase === 'ux') proj.uxDur = weeks; else proj.devDur = weeks;
       handle.removeEventListener('pointermove', onMove);
       handle.removeEventListener('pointerup', onUp);
-      saveState(); render();
+      saveState('bar_resized', 'project', proj.name); render();
     };
     handle.addEventListener('pointermove', onMove);
     handle.addEventListener('pointerup', onUp);
@@ -1040,18 +1129,22 @@ function saveProject() {
     devWeek:  parseInt(document.getElementById('f-dev-week').value) || 1,
     devDur:   parseInt(document.getElementById('f-dev-dur').value) || 6,
   };
-  if (editingProjectId) {
+  const isEdit = !!editingProjectId;
+  if (isEdit) {
     Object.assign(state.projects.find(p => p.id === editingProjectId), data);
   } else {
     state.projects.push({ id: 'p' + Date.now(), ...data });
   }
-  saveState(); closeModal(); render();
+  saveState(isEdit ? 'project_updated' : 'project_created', 'project', data.name);
+  closeModal(); render();
 }
 
 function deleteProject() {
   if (!editingProjectId) return;
+  const deleted = state.projects.find(p => p.id === editingProjectId);
   state.projects = state.projects.filter(p => p.id !== editingProjectId);
-  saveState(); closeModal(); render();
+  saveState('project_deleted', 'project', deleted?.name);
+  closeModal(); render();
 }
 
 function addTeam() {
@@ -1061,7 +1154,7 @@ function addTeam() {
   const owner = (document.getElementById('new-team-owner').value || '').trim();
   state.teams.push({ id: 't' + Date.now(), name, group, owner, color: TEAM_COLORS[state.teams.length % TEAM_COLORS.length] });
   input.value = ''; document.getElementById('new-team-group').value = ''; document.getElementById('new-team-owner').value = '';
-  saveState(); render();
+  saveState('team_created', 'team', name); render();
 }
 
 function deleteTeam(teamId) {
@@ -1072,15 +1165,16 @@ function deleteTeam(teamId) {
     ? `Delete "${team.name}" and its ${projectCount} project(s)?`
     : `Delete "${team.name}"?`;
   if (!confirm(msg)) return;
+  const deletedTeam = state.teams.find(t => t.id === teamId);
   state.teams = state.teams.filter(t => t.id !== teamId);
   state.projects = state.projects.filter(p => p.teamId !== teamId);
-  saveState(); render();
+  saveState('team_deleted', 'team', deletedTeam?.name); render();
 }
 
 function toggleTeam(teamId) {
   if (!state.collapsed) state.collapsed = {};
   state.collapsed[teamId] = !state.collapsed[teamId];
-  saveState(); render();
+  saveState(); render(); // collapse — no audit needed
 }
 
 function editTeamGroup(teamId) {
@@ -1089,7 +1183,7 @@ function editTeamGroup(teamId) {
   const val = prompt(`Group for "${team.name}":`, team.group || '');
   if (val === null) return;
   team.group = val.trim();
-  saveState(); render();
+  saveState('team_updated', 'team', team.name); render();
 }
 
 function editTeamOwner(teamId) {
@@ -1098,7 +1192,53 @@ function editTeamOwner(teamId) {
   const val = prompt(`Owner of "${team.name}":`, team.owner || '');
   if (val === null) return;
   team.owner = val.trim();
-  saveState(); render();
+  saveState('team_updated', 'team', team.name); render();
+}
+
+const ACTION_LABELS = {
+  login: 'logged in',
+  project_created: 'created project',
+  project_updated: 'updated project',
+  project_deleted: 'deleted project',
+  team_created: 'created team',
+  team_deleted: 'deleted team',
+  team_updated: 'updated team',
+  team_reordered: 'reordered team',
+  bar_moved: 'moved bar for',
+  bar_resized: 'resized bar for',
+  ux_done_toggled: 'toggled UX done on',
+};
+
+async function toggleAuditLog() {
+  const panel = document.getElementById('audit-panel');
+  const isOpen = panel.classList.contains('open');
+  if (isOpen) { panel.classList.remove('open'); return; }
+
+  panel.classList.add('open');
+  if (!sb) return;
+
+  const { data, error } = await sb.from('audit_log')
+    .select('*').order('created_at', { ascending: false }).limit(100);
+
+  const list = document.getElementById('audit-list');
+  if (error || !data?.length) {
+    list.innerHTML = '<div class="audit-empty">No activity yet.</div>'; return;
+  }
+
+  list.innerHTML = data.map(entry => {
+    const initials = (entry.user_email || '?').split(' ').filter(Boolean).map(w => w[0]).slice(0,2).join('').toUpperCase();
+    const action = ACTION_LABELS[entry.action] || entry.action;
+    const what = entry.entity_name ? `${action} <strong>${entry.entity_name}</strong>` : action;
+    const when = new Date(entry.created_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    return `
+      <div class="audit-item">
+        <div class="audit-avatar">${initials}</div>
+        <div class="audit-body">
+          <div><span class="audit-who">${entry.user_email}</span> <span class="audit-what">${what}</span></div>
+          <div class="audit-when">${when}</div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function exportHint() {
@@ -1109,6 +1249,7 @@ document.getElementById('modal').addEventListener('click', e => { if (e.target =
 document.getElementById('f-backlog').addEventListener('change', toggleBacklogUI);
 
 (async () => {
+  await initAuth();
   try {
     document.getElementById('roadmap').innerHTML = '<div style="padding:40px;text-align:center;color:#aaa;font-size:13px;">Loading roadmap...</div>';
     const remote = await loadStateRemote();
