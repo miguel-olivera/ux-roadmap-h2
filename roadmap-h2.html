@@ -73,9 +73,9 @@
   .team-section:last-child { border-bottom: none; }
 
   .team-label {
-    padding: 10px 16px; font-size: 12px; font-weight: 700; color: #fff;
+    padding: 10px 12px 10px 8px; font-size: 12px; font-weight: 700; color: #fff;
     border-right: 1px solid rgba(255,255,255,0.2);
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
     min-height: 68px;
   }
   .team-label-left { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
@@ -110,7 +110,7 @@
   .team-label:hover .team-delete-btn { opacity: 1; }
   .team-drag-handle {
     background: none; border: none; color: rgba(255,255,255,0.5);
-    cursor: grab; font-size: 14px; padding: 2px 4px; flex-shrink: 0;
+    cursor: grab; font-size: 14px; padding: 2px 2px 2px 0; flex-shrink: 0;
     line-height: 1; user-select: none;
   }
   .team-drag-handle:hover { color: rgba(255,255,255,0.9); }
@@ -292,6 +292,8 @@
   .audit-what { color: #666; }
   .audit-when { color: #bbb; font-size: 11px; margin-top: 2px; }
   .audit-empty { padding: 40px 20px; text-align: center; color: #ccc; font-size: 13px; }
+  .audit-detail { font-size: 11px; color: #999; margin-top: 2px; }
+  .audit-field { color: #bbb; text-transform: capitalize; }
 
   /* Lock screen */
   #lock-screen {
@@ -331,7 +333,7 @@
     <div style="font-size:36px;margin-bottom:16px;">📅</div>
     <h2>UX Roadmap H2 2026</h2>
     <p>Enter your name and the access password</p>
-    <input id="lock-name" type="text" placeholder="Your name (e.g. Miguel)" onkeydown="if(event.key==='Enter')document.getElementById('lock-input').focus()" style="margin-bottom:8px;">
+    <input id="lock-name" type="text" placeholder="Your name" onkeydown="if(event.key==='Enter')document.getElementById('lock-input').focus()" style="margin-bottom:8px;">
     <input id="lock-input" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')unlock()">
     <button id="lock-btn" onclick="unlock()">Access</button>
     <div class="lock-msg" id="lock-msg"></div>
@@ -592,7 +594,7 @@ function showSaveStatus(msg, color) {
   clearTimeout(el._t); el._t = setTimeout(() => el.textContent = '', 3000);
 }
 
-async function saveState(auditAction, auditEntity, auditName) {
+async function saveState(auditAction, auditEntity, auditName, auditDetails) {
   if (!sb) { showSaveStatus('⚠ Supabase not connected', '#e67e22'); return; }
   showSaveStatus('Saving...', '#aaa');
   const { error } = await sb.from('roadmap_state').upsert({ id: 1, state, updated_at: new Date().toISOString() });
@@ -608,6 +610,7 @@ async function saveState(auditAction, auditEntity, auditName) {
       action: auditAction,
       entity_type: auditEntity || null,
       entity_name: auditName || null,
+      details: auditDetails || null,
     });
     if (auditErr) console.error('[audit error]', auditErr);
   }
@@ -973,6 +976,8 @@ function setupDrag(bar, project, phase) {
     const startMouseX = e.clientX;
     const startLeft = bar.offsetLeft;
     let currentLeft = startLeft;
+    const fromStart = phase === 'ux' ? project.uxStart : project.devStart;
+    const fromWeek  = phase === 'ux' ? (project.uxWeek||1) : (project.devWeek||1);
 
     bar.setPointerCapture(e.pointerId);
     bar.style.cursor = 'grabbing';
@@ -1001,7 +1006,11 @@ function setupDrag(bar, project, phase) {
 
       bar.removeEventListener('pointermove', onMove);
       bar.removeEventListener('pointerup', onUp);
-      saveState('bar_moved', 'project', proj.name);
+      saveState('bar_moved', 'project', proj.name, {
+        phase: phase.toUpperCase(),
+        from: `${MONTHS.find(m=>m.key===fromStart)?.label} W${fromWeek}`,
+        to:   `${MONTHS.find(m=>m.key===MONTH_KEYS[monthIdx])?.label} W${weekInMonth}`
+      });
       render();
     };
 
@@ -1019,6 +1028,7 @@ function setupResize(handle, bar, project, phase) {
     const startX = e.clientX;
     const startW = bar.offsetWidth;
     let currentW = startW;
+    const oldDur = phase === 'ux' ? project.uxDur : project.devDur;
 
     handle.setPointerCapture(e.pointerId);
 
@@ -1033,7 +1043,10 @@ function setupResize(handle, bar, project, phase) {
       if (phase === 'ux') proj.uxDur = weeks; else proj.devDur = weeks;
       handle.removeEventListener('pointermove', onMove);
       handle.removeEventListener('pointerup', onUp);
-      saveState('bar_resized', 'project', proj.name); render();
+      saveState('bar_resized', 'project', proj.name, {
+        phase: phase.toUpperCase(),
+        from: `${oldDur}w`, to: `${weeks}w`
+      }); render();
     };
     handle.addEventListener('pointermove', onMove);
     handle.addEventListener('pointerup', onUp);
@@ -1130,12 +1143,24 @@ function saveProject() {
     devDur:   parseInt(document.getElementById('f-dev-dur').value) || 6,
   };
   const isEdit = !!editingProjectId;
+  let auditDetails = {};
   if (isEdit) {
-    Object.assign(state.projects.find(p => p.id === editingProjectId), data);
+    const old = state.projects.find(p => p.id === editingProjectId);
+    const changed = {};
+    if (old.name !== data.name) changed.name = { from: old.name, to: data.name };
+    if (old.owner !== data.owner) changed.owner = { from: old.owner||'—', to: data.owner||'—' };
+    if (old.uxStart !== data.uxStart || old.uxWeek !== data.uxWeek) changed.ux_start = { from: `${old.uxStart} W${old.uxWeek||1}`, to: `${data.uxStart} W${data.uxWeek}` };
+    if (old.devStart !== data.devStart || old.devWeek !== data.devWeek) changed.dev_start = { from: `${old.devStart} W${old.devWeek||1}`, to: `${data.devStart} W${data.devWeek}` };
+    if (old.uxDur !== data.uxDur) changed.ux_duration = { from: `${old.uxDur}w`, to: `${data.uxDur}w` };
+    if (old.devDur !== data.devDur) changed.dev_duration = { from: `${old.devDur}w`, to: `${data.devDur}w` };
+    if (old.backlog !== data.backlog) changed.backlog = { from: old.backlog, to: data.backlog };
+    auditDetails = { changed };
+    Object.assign(old, data);
   } else {
     state.projects.push({ id: 'p' + Date.now(), ...data });
+    auditDetails = { team: state.teams.find(t=>t.id===data.teamId)?.name, owner: data.owner||'—' };
   }
-  saveState(isEdit ? 'project_updated' : 'project_created', 'project', data.name);
+  saveState(isEdit ? 'project_updated' : 'project_created', 'project', data.name, auditDetails);
   closeModal(); render();
 }
 
@@ -1230,11 +1255,27 @@ async function toggleAuditLog() {
     const action = ACTION_LABELS[entry.action] || entry.action;
     const what = entry.entity_name ? `${action} <strong>${entry.entity_name}</strong>` : action;
     const when = new Date(entry.created_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+
+    let detailHtml = '';
+    const d = entry.details;
+    if (d) {
+      if (d.from && d.to) {
+        detailHtml = `<div class="audit-detail">${d.phase ? d.phase+': ' : ''}${d.from} → ${d.to}</div>`;
+      } else if (d.changed && Object.keys(d.changed).length > 0) {
+        detailHtml = Object.entries(d.changed).map(([k, v]) =>
+          `<div class="audit-detail"><span class="audit-field">${k.replace('_',' ')}:</span> ${v.from} → ${v.to}</div>`
+        ).join('');
+      } else if (d.team || d.owner) {
+        detailHtml = `<div class="audit-detail">Team: ${d.team||'—'} · Owner: ${d.owner||'—'}</div>`;
+      }
+    }
+
     return `
       <div class="audit-item">
         <div class="audit-avatar">${initials}</div>
         <div class="audit-body">
           <div><span class="audit-who">${entry.user_email}</span> <span class="audit-what">${what}</span></div>
+          ${detailHtml}
           <div class="audit-when">${when}</div>
         </div>
       </div>`;
