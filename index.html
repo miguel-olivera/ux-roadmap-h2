@@ -424,41 +424,27 @@
           <input id="f-ux-done" type="checkbox"> ✅ Done
         </label>
       </div>
-      <div class="form-row" style="grid-template-columns:2fr 1fr 1fr;">
+      <div class="form-row" style="grid-template-columns:2fr 1fr;">
         <div class="form-group" style="margin:0">
-          <label>Start month</label>
+          <label>Start week</label>
           <select id="f-ux-start"></select>
         </div>
         <div class="form-group" style="margin:0">
-          <label>Week</label>
-          <select id="f-ux-week">
-            <option value="1">W1</option><option value="2">W2</option>
-            <option value="3">W3</option><option value="4">W4</option>
-          </select>
-        </div>
-        <div class="form-group" style="margin:0">
           <label>Duration (w)</label>
-          <input id="f-ux-dur" type="number" min="1" max="32" value="4">
+          <input id="f-ux-dur" type="number" min="1" max="36" value="4">
         </div>
       </div>
     </div>
     <div style="background:#f9f9f9;border-radius:8px;padding:14px;margin-bottom:4px;" id="dev-phase-block">
       <div style="font-size:12px;font-weight:600;color:#555;margin-bottom:10px;">⚙️ Development phase</div>
-      <div class="form-row" style="grid-template-columns:2fr 1fr 1fr;">
+      <div class="form-row" style="grid-template-columns:2fr 1fr;">
         <div class="form-group" style="margin:0">
-          <label>Start month</label>
+          <label>Start week</label>
           <select id="f-dev-start"></select>
         </div>
         <div class="form-group" style="margin:0">
-          <label>Week</label>
-          <select id="f-dev-week">
-            <option value="1">W1</option><option value="2">W2</option>
-            <option value="3">W3</option><option value="4">W4</option>
-          </select>
-        </div>
-        <div class="form-group" style="margin:0">
           <label>Duration (w)</label>
-          <input id="f-dev-dur" type="number" min="1" max="32" value="6">
+          <input id="f-dev-dur" type="number" min="1" max="36" value="6">
         </div>
       </div>
     </div>
@@ -472,21 +458,6 @@
 </div>
 
 <script>
-const MONTHS = [
-  { key: 'may', label: 'May',       q: 'Q2', past: true  },
-  { key: 'jun', label: 'June',      q: 'Q2', past: true  },
-  { key: 'jul', label: 'July',      q: 'Q3', past: false },
-  { key: 'aug', label: 'August',    q: 'Q3', past: false },
-  { key: 'sep', label: 'September', q: 'Q3', past: false },
-  { key: 'oct', label: 'October',   q: 'Q4', past: false },
-  { key: 'nov', label: 'November',  q: 'Q4', past: false },
-  { key: 'dec', label: 'December',  q: 'Q4', past: false },
-];
-
-// Today marker: June 2 = index 1 (June), day 2/30 ≈ 6.7% into the month
-const TODAY_MONTH = 'jun';
-const TODAY_DAY_FRAC = 2 / 30;
-const MONTH_KEYS = MONTHS.map(m => m.key);
 const TEAM_COLORS = ['#FF6B35','#3355cc','#2c8a5a','#8b44ac','#c0392b','#0097a7','#e67e22','#546e7a'];
 
 function ownerInitials(name) {
@@ -690,54 +661,94 @@ function refreshFilterOptions() {
 
 
 const TEAM_COL = 220;
-const MONTH_COL = 120;
+const WEEK_COL  = 38; // px per ISO week
+
+// ISO weeks W18–W53 of 2026 (May → Dec)
+const WEEKS = [
+  {num:18,label:'W18',month:'May',q:'Q2',past:true }, {num:19,label:'W19',month:'May',q:'Q2',past:true },
+  {num:20,label:'W20',month:'May',q:'Q2',past:true }, {num:21,label:'W21',month:'May',q:'Q2',past:true },
+  {num:22,label:'W22',month:'May',q:'Q2',past:true }, {num:23,label:'W23',month:'Jun',q:'Q2',past:false},
+  {num:24,label:'W24',month:'Jun',q:'Q2',past:false}, {num:25,label:'W25',month:'Jun',q:'Q2',past:false},
+  {num:26,label:'W26',month:'Jun',q:'Q2',past:false}, {num:27,label:'W27',month:'Jul',q:'Q3',past:false},
+  {num:28,label:'W28',month:'Jul',q:'Q3',past:false}, {num:29,label:'W29',month:'Jul',q:'Q3',past:false},
+  {num:30,label:'W30',month:'Jul',q:'Q3',past:false}, {num:31,label:'W31',month:'Jul',q:'Q3',past:false},
+  {num:32,label:'W32',month:'Aug',q:'Q3',past:false}, {num:33,label:'W33',month:'Aug',q:'Q3',past:false},
+  {num:34,label:'W34',month:'Aug',q:'Q3',past:false}, {num:35,label:'W35',month:'Aug',q:'Q3',past:false},
+  {num:36,label:'W36',month:'Sep',q:'Q3',past:false}, {num:37,label:'W37',month:'Sep',q:'Q3',past:false},
+  {num:38,label:'W38',month:'Sep',q:'Q3',past:false}, {num:39,label:'W39',month:'Sep',q:'Q3',past:false},
+  {num:40,label:'W40',month:'Oct',q:'Q4',past:false}, {num:41,label:'W41',month:'Oct',q:'Q4',past:false},
+  {num:42,label:'W42',month:'Oct',q:'Q4',past:false}, {num:43,label:'W43',month:'Oct',q:'Q4',past:false},
+  {num:44,label:'W44',month:'Oct',q:'Q4',past:false}, {num:45,label:'W45',month:'Nov',q:'Q4',past:false},
+  {num:46,label:'W46',month:'Nov',q:'Q4',past:false}, {num:47,label:'W47',month:'Nov',q:'Q4',past:false},
+  {num:48,label:'W48',month:'Nov',q:'Q4',past:false}, {num:49,label:'W49',month:'Dec',q:'Q4',past:false},
+  {num:50,label:'W50',month:'Dec',q:'Q4',past:false}, {num:51,label:'W51',month:'Dec',q:'Q4',past:false},
+  {num:52,label:'W52',month:'Dec',q:'Q4',past:false}, {num:53,label:'W53',month:'Dec',q:'Q4',past:false},
+];
+const WEEK_NUMS = WEEKS.map(w => w.num);
+
+// Today: June 3 = W23, day 3/7
+const TODAY_WEEK = 23;
+const TODAY_DAY_FRAC = 3 / 7;
+
+// Compatibility: convert old month+week format to ISO week number
+const MONTH_TO_FIRST_WEEK = { may:18, jun:23, jul:27, aug:32, sep:36, oct:40, nov:45, dec:49 };
+function toWeekNum(project, phase) {
+  const start = phase === 'ux' ? project.uxStart : project.devStart;
+  if (typeof start === 'number') return start;
+  // Old format: month string + uxWeek/devWeek
+  const base = MONTH_TO_FIRST_WEEK[start] || 23;
+  const weekOffset = (phase === 'ux' ? (project.uxWeek||1) : (project.devWeek||1)) - 1;
+  return base + weekOffset;
+}
 
 function render() {
   const roadmap = document.getElementById('roadmap');
   roadmap.innerHTML = '';
-  const gridCols = `${TEAM_COL}px repeat(${MONTH_KEYS.length}, ${MONTH_COL}px)`;
+  const gridCols = `${TEAM_COL}px repeat(${WEEKS.length}, ${WEEK_COL}px)`;
 
-  // Header
+  // ── Header (3 rows: quarter / month / week) ──
   const hdr = document.createElement('div');
-  hdr.style.cssText = `display:grid; grid-template-columns:${gridCols}; grid-template-rows:auto auto; border-bottom:2px solid #e0e0e0;`;
+  hdr.style.cssText = `display:grid; grid-template-columns:${gridCols}; grid-template-rows:auto auto auto; border-bottom:2px solid #e0e0e0; position:relative;`;
 
-  const teamCell = document.createElement('div');
-  teamCell.className = 'th-team';
-  teamCell.textContent = 'Team / Project';
-  hdr.appendChild(teamCell);
-
+  // Row 1: team label + quarter spans
+  hdr.appendChild(Object.assign(document.createElement('div'), { className:'th-team', style:'grid-row:1;', textContent:'Team / Project' }));
   const quarters = {};
-  MONTHS.forEach(m => { if (!quarters[m.q]) quarters[m.q]={count:0,past:m.past}; quarters[m.q].count++; if(!m.past) quarters[m.q].past=false; });
-  Object.entries(quarters).forEach(([q, info]) => {
+  WEEKS.forEach(w => { if(!quarters[w.q]) quarters[w.q]={count:0,allPast:true}; quarters[w.q].count++; if(!w.past) quarters[w.q].allPast=false; });
+  Object.entries(quarters).forEach(([q,info]) => {
     const c = document.createElement('div');
-    c.className = 'th-quarter' + (info.past ? ' past' : '');
-    c.style.cssText = `grid-column:span ${info.count}; border-right:1px solid #e0e0e0;`;
-    c.textContent = q;
-    hdr.appendChild(c);
+    c.className='th-quarter'+(info.allPast?' past':'');
+    c.style.cssText=`grid-column:span ${info.count};border-right:1px solid #e0e0e0;`;
+    c.textContent=q; hdr.appendChild(c);
   });
 
-  hdr.appendChild(Object.assign(document.createElement('div'), { style: 'background:#fafafa;border-right:1px solid #e0e0e0;' }));
-  MONTHS.forEach(m => {
+  // Row 2: blank + month spans
+  hdr.appendChild(Object.assign(document.createElement('div'), { style:'background:#fafafa;border-right:1px solid #e0e0e0;grid-row:2;' }));
+  const months = {};
+  WEEKS.forEach(w => { if(!months[w.month]) months[w.month]={count:0,allPast:true,q:w.q}; months[w.month].count++; if(!w.past) months[w.month].allPast=false; });
+  Object.entries(months).forEach(([m,info]) => {
     const c = document.createElement('div');
-    c.className = 'th-month' + (m.past ? ' past' : '');
-    c.innerHTML = `<div style="padding:3px 0 2px;">${m.label}</div>
-      <div class="week-ticks">
-        <div class="week-tick">W1</div><div class="week-tick">W2</div>
-        <div class="week-tick">W3</div><div class="week-tick">W4</div>
-      </div>`;
-    hdr.appendChild(c);
+    c.className='th-month'+(info.allPast?' past':'');
+    c.style.cssText=`grid-column:span ${info.count};border-right:1px solid #ddd;text-align:center;padding:4px 0;font-size:11px;font-weight:600;color:#555;`;
+    c.textContent=m; hdr.appendChild(c);
   });
-  hdr.style.position = 'relative';
-  const todayIdx = MONTH_KEYS.indexOf(TODAY_MONTH);
-  if (todayIdx >= 0) {
-    const todayX = TEAM_COL + todayIdx * MONTH_COL + TODAY_DAY_FRAC * MONTH_COL;
+
+  // Row 3: blank + individual week labels
+  hdr.appendChild(Object.assign(document.createElement('div'), { style:'background:#fafafa;border-right:1px solid #e0e0e0;grid-row:3;' }));
+  WEEKS.forEach(w => {
+    const c = document.createElement('div');
+    c.style.cssText=`text-align:center;font-size:9px;color:${w.past?'#ccc':'#999'};padding:2px 0;border-right:1px solid #f0f0f0;background:${w.past?'#f8f8f8':'#fafafa'};`;
+    c.textContent=w.label; hdr.appendChild(c);
+  });
+
+  // Today marker in header
+  const todayWIdx = WEEK_NUMS.indexOf(TODAY_WEEK);
+  if (todayWIdx >= 0) {
+    const todayX = TEAM_COL + todayWIdx * WEEK_COL + TODAY_DAY_FRAC * WEEK_COL;
     const tl = document.createElement('div');
-    tl.style.cssText = `position:absolute;top:0;bottom:0;left:${todayX}px;width:2px;background:#FF6B35;z-index:5;pointer-events:none;`;
+    tl.style.cssText=`position:absolute;top:0;bottom:0;left:${todayX}px;width:2px;background:#FF6B35;z-index:5;pointer-events:none;`;
     hdr.appendChild(tl);
     const lbl = document.createElement('div');
-    lbl.className = 'today-label';
-    lbl.style.left = todayX + 'px';
-    lbl.textContent = 'Today';
+    lbl.className='today-label'; lbl.style.left=todayX+'px'; lbl.textContent='Today';
     hdr.appendChild(lbl);
   }
   roadmap.appendChild(hdr);
@@ -818,9 +829,9 @@ function render() {
       <button class="add-project-btn" title="Add project" onclick="openAddProject('${team.id}')">+</button>
       <button class="add-project-btn team-delete-btn" title="Delete team" onclick="deleteTeam('${team.id}')">🗑</button>`;
     teamRow.appendChild(lbl);
-    MONTHS.forEach(m => {
+    WEEKS.forEach(w => {
       const c = document.createElement('div');
-      const bg = m.past ? '#f5f5f5' : `${team.color}08`;
+      const bg = w.past ? '#f5f5f5' : `${team.color}08`;
       c.style.cssText = `background:${bg}; border-right:1px solid ${team.color}18; min-height:8px;`;
       teamRow.appendChild(c);
     });
@@ -854,7 +865,7 @@ function render() {
       bLbl.innerHTML = `<span>Not prioritized</span>`;
       bHdr.appendChild(bLbl);
       // Fill remaining columns
-      MONTHS.forEach(() => {
+      WEEKS.forEach(() => {
         const c = document.createElement('div');
         c.style.cssText = `border-right:1px solid #f5f5f5; background:#fafafa;`;
         bHdr.appendChild(c);
@@ -878,7 +889,7 @@ function render() {
         // Timeline area — just a striped placeholder
         const tl = document.createElement('div');
         tl.className = 'backlog-timeline';
-        tl.style.cssText = `grid-column:2/${2+MONTH_KEYS.length};`;
+        tl.style.cssText = `grid-column:2/${2+WEEKS.length};`;
         row.appendChild(tl);
 
         bSection.appendChild(row);
@@ -891,9 +902,9 @@ function render() {
   });
 
   // Single today line over the full body
-  const todayIdx2 = MONTH_KEYS.indexOf(TODAY_MONTH);
+  const todayIdx2 = WEEK_NUMS.indexOf(TODAY_WEEK);
   if (todayIdx2 >= 0) {
-    const todayX = TEAM_COL + todayIdx2 * MONTH_COL + TODAY_DAY_FRAC * MONTH_COL;
+    const todayX = TEAM_COL + todayIdx2 * WEEK_COL + TODAY_DAY_FRAC * WEEK_COL;
     const tl = document.createElement('div');
     tl.style.cssText = `position:absolute;top:0;bottom:0;left:${todayX}px;width:2px;background:#FF6B35;z-index:10;pointer-events:none;`;
     body.appendChild(tl);
@@ -937,16 +948,18 @@ function buildProjectRow(project, team, gridCols, allOwners) {
   row.appendChild(nameCell);
 
   const barContainer = document.createElement('div');
-  barContainer.style.cssText = `position:relative; grid-column:2/${2+MONTH_KEYS.length}; min-height:52px;`;
+  barContainer.style.cssText = `position:relative; grid-column:2/${2+WEEKS.length}; min-height:52px;`;
 
-  // Grid lines + past shading
-  MONTHS.forEach((m, i) => {
+  // Grid lines + past shading (per week)
+  WEEKS.forEach((w, i) => {
     const line = document.createElement('div');
-    line.style.cssText = `position:absolute;top:0;bottom:0;left:${i*MONTH_COL}px;width:1px;background:#ebebeb;z-index:1;`;
+    // Darker line at month boundaries
+    const isMonthStart = i === 0 || WEEKS[i-1].month !== w.month;
+    line.style.cssText = `position:absolute;top:0;bottom:0;left:${i*WEEK_COL}px;width:1px;background:${isMonthStart?'#d8d8d8':'#f0f0f0'};z-index:1;`;
     barContainer.appendChild(line);
-    if (m.past) {
+    if (w.past) {
       const shade = document.createElement('div');
-      shade.style.cssText = `position:absolute;top:0;bottom:0;left:${i*MONTH_COL}px;width:${MONTH_COL}px;background:rgba(0,0,0,0.03);z-index:1;pointer-events:none;`;
+      shade.style.cssText = `position:absolute;top:0;bottom:0;left:${i*WEEK_COL}px;width:${WEEK_COL}px;background:rgba(0,0,0,0.03);z-index:1;pointer-events:none;`;
       barContainer.appendChild(shade);
     }
   });
@@ -963,15 +976,13 @@ function createBar(project, phase) {
   const bar = document.createElement('div');
   bar.className = `phase-bar ${phase}${isDone ? ' ux-done' : ''}`;
 
-  const startKey  = phase === 'ux' ? project.uxStart : project.devStart;
-  const startWeek = phase === 'ux' ? (project.uxWeek || 1) : (project.devWeek || 1);
-  const dur       = phase === 'ux' ? project.uxDur   : project.devDur;
-  const WEEK = MONTH_COL / 4;
-  const top = phase === 'ux' ? 8 : (
-    project.uxStart === project.devStart && project.uxWeek === project.devWeek ? 34 : 8
-  );
-  const x = MONTH_KEYS.indexOf(startKey) * MONTH_COL + (startWeek - 1) * WEEK;
-  const w = dur * WEEK;
+  const startWeekNum = toWeekNum(project, phase);
+  const dur = phase === 'ux' ? project.uxDur : project.devDur;
+  const uxWeekNum  = toWeekNum(project, 'ux');
+  const devWeekNum = toWeekNum(project, 'dev');
+  const top = phase === 'ux' ? 8 : (uxWeekNum === devWeekNum ? 34 : 8);
+  const x = WEEK_NUMS.indexOf(startWeekNum) * WEEK_COL;
+  const w = dur * WEEK_COL;
 
   bar.style.cssText = `left:${x}px; width:${w}px; top:${top}px; position:absolute; height:28px; border-radius:5px; display:flex; align-items:center; padding:0 8px; font-size:11px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:grab; user-select:none; z-index:2;`;
 
@@ -1007,12 +1018,11 @@ function setupDrag(bar, project, phase) {
     if (e.target.classList.contains('resize-handle')) return;
     e.preventDefault();
 
-    const snap = MONTH_COL / 4;
+    const snap = WEEK_COL;
     const startMouseX = e.clientX;
     const startLeft = bar.offsetLeft;
     let currentLeft = startLeft;
-    const fromStart = phase === 'ux' ? project.uxStart : project.devStart;
-    const fromWeek  = phase === 'ux' ? (project.uxWeek||1) : (project.devWeek||1);
+    const fromWeekNum = toWeekNum(project, phase);
 
     bar.setPointerCapture(e.pointerId);
     bar.style.cursor = 'grabbing';
@@ -1030,21 +1040,19 @@ function setupDrag(bar, project, phase) {
       bar.style.opacity = '1';
       bar.style.zIndex = '2';
 
-      const WEEK = MONTH_COL / 4;
-      const totalWeeks = Math.round(currentLeft / WEEK);
-      const monthIdx = Math.max(0, Math.min(MONTH_KEYS.length - 1, Math.floor(totalWeeks / 4)));
-      const weekInMonth = Math.max(1, Math.min(4, (totalWeeks % 4) + 1));
+      const weekIdx = Math.max(0, Math.min(WEEK_NUMS.length - 1, Math.round(currentLeft / WEEK_COL)));
+      const newWeekNum = WEEK_NUMS[weekIdx];
 
       const proj = state.projects.find(p => p.id === project.id);
-      if (phase === 'ux') { proj.uxStart = MONTH_KEYS[monthIdx]; proj.uxWeek = weekInMonth; }
-      else { proj.devStart = MONTH_KEYS[monthIdx]; proj.devWeek = weekInMonth; }
+      if (phase === 'ux') { proj.uxStart = newWeekNum; delete proj.uxWeek; }
+      else { proj.devStart = newWeekNum; delete proj.devWeek; }
 
       bar.removeEventListener('pointermove', onMove);
       bar.removeEventListener('pointerup', onUp);
       saveState('bar_moved', 'project', proj.name, {
         phase: phase.toUpperCase(),
-        from: `${MONTHS.find(m=>m.key===fromStart)?.label} W${fromWeek}`,
-        to:   `${MONTHS.find(m=>m.key===MONTH_KEYS[monthIdx])?.label} W${weekInMonth}`
+        from: `W${fromWeekNum}`,
+        to:   `W${newWeekNum}`
       });
       render();
     };
@@ -1059,7 +1067,7 @@ function setupResize(handle, bar, project, phase) {
     e.preventDefault();
     e.stopPropagation();
 
-    const snap = MONTH_COL / 4;
+    const snap = WEEK_COL;
     const startX = e.clientX;
     const startW = bar.offsetWidth;
     let currentW = startW;
@@ -1100,7 +1108,7 @@ function populateFormSelects() {
   ['f-ux-start','f-dev-start'].forEach(id => {
     const s = document.getElementById(id); if (!s) return;
     const v = s.value;
-    s.innerHTML = MONTHS.map(m => `<option value="${m.key}">${m.label}</option>`).join('');
+    s.innerHTML = WEEKS.map(w => `<option value="${w.num}">${w.label} (${w.month})</option>`).join('');
     if (v) s.value = v;
   });
 }
@@ -1115,13 +1123,13 @@ function openAddProject(teamId) {
   document.getElementById('f-new-team-name').value = '';
   document.getElementById('f-new-team-group').value = '';
   document.getElementById('new-team-inline').style.display = 'none';
+  document.getElementById('f-ux-start').value = '27';
+  document.getElementById('f-dev-start').value = '31';
   toggleBacklogUI();
   document.getElementById('f-ux-done').checked = false;
-  document.getElementById('f-ux-start').value = 'jul';
-  document.getElementById('f-ux-week').value = '1';
+  document.getElementById('f-ux-start').value = '27';
   document.getElementById('f-ux-dur').value = '4';
-  document.getElementById('f-dev-start').value = 'aug';
-  document.getElementById('f-dev-week').value = '1';
+  document.getElementById('f-dev-start').value = '31';
   document.getElementById('f-dev-dur').value = '6';
   if (teamId) document.getElementById('f-team').value = teamId;
   refreshOwnersList();
@@ -1140,11 +1148,9 @@ function openEditProject(id) {
   document.getElementById('f-backlog').checked = !!p.backlog;
   toggleBacklogUI();
   document.getElementById('f-ux-done').checked = !!p.uxDone;
-  document.getElementById('f-ux-start').value = p.uxStart;
-  document.getElementById('f-ux-week').value = p.uxWeek || 1;
+  document.getElementById('f-ux-start').value = toWeekNum(p, 'ux');
   document.getElementById('f-ux-dur').value = p.uxDur;
-  document.getElementById('f-dev-start').value = p.devStart;
-  document.getElementById('f-dev-week').value = p.devWeek || 1;
+  document.getElementById('f-dev-start').value = toWeekNum(p, 'dev');
   document.getElementById('f-dev-dur').value = p.devDur;
   refreshOwnersList();
   document.getElementById('modal').classList.add('open');
@@ -1191,11 +1197,9 @@ function saveProject() {
     backlog:  document.getElementById('f-backlog').checked,
     teamId,
     uxDone:   document.getElementById('f-ux-done').checked,
-    uxStart:  document.getElementById('f-ux-start').value,
-    uxWeek:   parseInt(document.getElementById('f-ux-week').value) || 1,
+    uxStart:  parseInt(document.getElementById('f-ux-start').value) || 27,
     uxDur:    parseInt(document.getElementById('f-ux-dur').value) || 4,
-    devStart: document.getElementById('f-dev-start').value,
-    devWeek:  parseInt(document.getElementById('f-dev-week').value) || 1,
+    devStart: parseInt(document.getElementById('f-dev-start').value) || 31,
     devDur:   parseInt(document.getElementById('f-dev-dur').value) || 6,
   };
   const isEdit = !!editingProjectId;
