@@ -392,7 +392,20 @@
     </div>
     <div class="form-group">
       <label>Team</label>
-      <select id="f-team"></select>
+      <select id="f-team" onchange="toggleNewTeamFields()"></select>
+    </div>
+    <div id="new-team-inline" style="display:none; background:#f9f9f9; border-radius:8px; padding:12px; margin-top:-8px; margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:600;color:#888;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px;">New team</div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;">
+        <div class="form-group" style="margin:0">
+          <label>Team name</label>
+          <input id="f-new-team-name" type="text" placeholder="e.g. Growth">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Group</label>
+          <input id="f-new-team-group" type="text" placeholder="e.g. Growth">
+        </div>
+      </div>
     </div>
     <div class="form-group">
       <label>Owner</label>
@@ -1059,7 +1072,8 @@ let editingProjectId = null;
 function populateFormSelects() {
   const ts = document.getElementById('f-team'); if (!ts) return;
   const tv = ts.value;
-  ts.innerHTML = state.teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  ts.innerHTML = state.teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('') +
+    `<option value="__new__">+ Create new team</option>`;
   if (tv) ts.value = tv;
   ['f-ux-start','f-dev-start'].forEach(id => {
     const s = document.getElementById(id); if (!s) return;
@@ -1076,6 +1090,9 @@ function openAddProject(teamId) {
   document.getElementById('f-name').value = '';
   document.getElementById('f-owner').value = '';
   document.getElementById('f-backlog').checked = false;
+  document.getElementById('f-new-team-name').value = '';
+  document.getElementById('f-new-team-group').value = '';
+  document.getElementById('new-team-inline').style.display = 'none';
   toggleBacklogUI();
   document.getElementById('f-ux-done').checked = false;
   document.getElementById('f-ux-start').value = 'jul';
@@ -1113,6 +1130,12 @@ function openEditProject(id) {
 
 function closeModal() { document.getElementById('modal').classList.remove('open'); editingProjectId = null; }
 
+function toggleNewTeamFields() {
+  const val = document.getElementById('f-team').value;
+  document.getElementById('new-team-inline').style.display = val === '__new__' ? 'block' : 'none';
+  if (val === '__new__') document.getElementById('f-new-team-name').focus();
+}
+
 function toggleBacklogUI() {
   const isBacklog = document.getElementById('f-backlog').checked;
   document.getElementById('f-dates-section').style.display = isBacklog ? 'none' : 'block';
@@ -1129,11 +1152,22 @@ function refreshOwnersList() {
 function saveProject() {
   const name = document.getElementById('f-name').value.trim();
   if (!name) { document.getElementById('f-name').focus(); return; }
+  let teamId = document.getElementById('f-team').value;
+  if (teamId === '__new__') {
+    const newTeamName = document.getElementById('f-new-team-name').value.trim();
+    if (!newTeamName) { document.getElementById('f-new-team-name').focus(); return; }
+    const newTeamGroup = document.getElementById('f-new-team-group').value.trim();
+    const newTeam = { id: 't' + Date.now(), name: newTeamName, group: newTeamGroup, owner: '', color: TEAM_COLORS[state.teams.length % TEAM_COLORS.length] };
+    state.teams.push(newTeam);
+    teamId = newTeam.id;
+    saveState('team_created', 'team', newTeamName, {});
+  }
+
   const data = {
     name,
     owner:    document.getElementById('f-owner').value.trim(),
     backlog:  document.getElementById('f-backlog').checked,
-    teamId:   document.getElementById('f-team').value,
+    teamId,
     uxDone:   document.getElementById('f-ux-done').checked,
     uxStart:  document.getElementById('f-ux-start').value,
     uxWeek:   parseInt(document.getElementById('f-ux-week').value) || 1,
