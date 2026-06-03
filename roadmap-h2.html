@@ -498,6 +498,7 @@ let state = {
   teams: [
     { id: 't1', name: 'Savings & Pricing', color: '#FF6B35', owner: 'Pedro Álvarez', group: 'Growth' },
     { id: 't2', name: 'Checkout', color: '#3355cc', owner: '', group: '' },
+    { id: 't3', name: 'Search & Product Page', color: '#2c8a5a', owner: '', group: '' },
   ],
   projects: [
     // Savings & Pricing — Dev timings from roadmap, UX placeholders to adjust
@@ -522,6 +523,27 @@ let state = {
     { id:'b3', teamId:'t1', name:'Discounted Delivery Fee', backlog:true, owner:'' },
     // Checkout
     { id:'p16', teamId:'t2', name:'Checkout redesign', uxStart:'jul', uxWeek:1, uxDur:6, devStart:'sep', devWeek:1, devDur:8, uxDone:false, owner:'' },
+
+    // Search & Product Page — with UX (green blocks)
+    { id:'s1',  teamId:'t3', name:'Auto-suggestion Enhancement',  uxStart:'jul', uxWeek:3, uxDur:4,  devStart:'aug', devWeek:3, devDur:4,  uxDone:false, owner:'' },
+    { id:'s2',  teamId:'t3', name:'Discovery Surface',            uxStart:'aug', uxWeek:1, uxDur:4,  devStart:'aug', devWeek:3, devDur:6,  uxDone:false, owner:'' },
+    { id:'s3',  teamId:'t3', name:'Search Animation',             uxStart:'oct', uxWeek:2, uxDur:3,  devStart:'nov', devWeek:1, devDur:4,  uxDone:false, owner:'' },
+    { id:'s4',  teamId:'t3', name:'All-tab Nightmare',            uxStart:'sep', uxWeek:1, uxDur:6,  devStart:'oct', devWeek:1, devDur:8,  uxDone:false, owner:'' },
+    { id:'s5',  teamId:'t3', name:'PDP Quick Wins',               uxStart:'jul', uxWeek:1, uxDur:4,  devStart:'jun', devWeek:2, devDur:8,  uxDone:false, owner:'' },
+    { id:'s6',  teamId:'t3', name:'Vertical Vision',              uxStart:'aug', uxWeek:1, uxDur:8,  devStart:'nov', devWeek:1, devDur:8,  uxDone:false, owner:'' },
+    { id:'s7',  teamId:'t3', name:'PDP Vision',                   uxStart:'aug', uxWeek:3, uxDur:4,  devStart:'oct', devWeek:1, devDur:12, uxDone:false, owner:'' },
+
+    // Search & Product Page — no UX needed (backlog or dev-only)
+    { id:'s8',  teamId:'t3', name:'Adaptive Search Strategy',     backlog:true, owner:'' },
+    { id:'s9',  teamId:'t3', name:'Branded Search – Performance', backlog:true, owner:'' },
+    { id:'s10', teamId:'t3', name:'Visual Cues',                  backlog:true, owner:'' },
+    { id:'s11', teamId:'t3', name:'North Star Architecture',      backlog:true, owner:'' },
+    { id:'s12', teamId:'t3', name:'Pagination (in & out-store)',  backlog:true, owner:'' },
+    { id:'s13', teamId:'t3', name:'Query Understanding Improv.',  backlog:true, owner:'' },
+    { id:'s14', teamId:'t3', name:'iOS Modernization',            backlog:true, owner:'' },
+    { id:'s15', teamId:'t3', name:'Tech Debts (Android)',         backlog:true, owner:'' },
+    { id:'s16', teamId:'t3', name:'QC Translation',               backlog:true, owner:'' },
+    { id:'s17', teamId:'t3', name:'Buy Box',                      backlog:true, owner:'' },
   ]
 };
 
