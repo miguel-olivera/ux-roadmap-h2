@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadmap H2 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif; background: #f0f0f0; color: #1a1a1a; }
+
+  .app-header {
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .app-header h1 { font-size: 16px; font-weight: 600; }
+  .header-actions { display: flex; gap: 8px; }
+  .btn {
+    padding: 7px 14px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: #FF6B35; color: #fff; }
+  .btn-primary:hover { background: #e55a25; }
+  .btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #ddd; }
+  .btn-secondary:hover { background: #eee; }
+
+  .legend {
+    padding: 10px 24px; background: #fff; border-bottom: 1px solid #e8e8e8;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #555; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+  .roadmap-wrapper { overflow-x: auto; padding: 20px 24px; }
+  .roadmap { min-width: 900px; background: #fff; border-radius: 10px; border: 1px solid #e0e0e0; overflow: hidden; position: relative; }
+  .roadmap-body { position: relative; }
+
+  .th-team { background: #fafafa; font-weight: 600; font-size: 12px; color: #666;
+    padding: 10px 16px; border-right: 1px solid #e0e0e0; display: flex; align-items: center; }
+  .th-quarter { background: #f0f4ff; text-align: center; font-size: 12px; font-weight: 600;
+    color: #3355cc; padding: 8px 0; border-right: 1px solid #e0e0e0; }
+  .th-quarter.past { background: #f0f0f0; color: #aaa; }
+  .th-month { background: #fafafa; text-align: center; font-size: 12px; font-weight: 500;
+    color: #555; padding: 4px 0 2px; border-right: 1px solid #e0e0e0; position: relative; }
+  .th-month.past { background: #f5f5f5; color: #bbb; }
+  .th-month:last-child { border-right: none; }
+  .week-ticks { display: flex; padding: 0; }
+  .week-tick { flex: 1; text-align: center; font-size: 9px; color: #ccc; padding: 2px 0;
+    border-left: 1px solid #eee; }
+  .week-tick:first-child { border-left: none; }
+  .th-month.past .week-tick { color: #ddd; }
+
+  .today-line {
+    position: absolute; top: 0; bottom: 0; width: 2px;
+    background: #FF6B35; z-index: 5; pointer-events: none;
+  }
+  .today-label {
+    position: absolute; top: 6px;
+    background: #FF6B35; color: #fff;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 5px; border-radius: 3px;
+    transform: translateX(-50%);
+    white-space: nowrap; z-index: 6; pointer-events: none;
+  }
+
+  .team-section { border-bottom: 1px solid #f0f0f0; }
+  .team-section:last-child { border-bottom: none; }
+
+  .team-label {
+    padding: 10px 16px; font-size: 12px; font-weight: 700; color: #fff;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    min-height: 68px;
+  }
+  .team-label-left { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+  .team-label-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .team-group-tag {
+    display: inline-block; width: fit-content; align-self: flex-start;
+    font-size: 9px; font-weight: 600; letter-spacing: 0.4px;
+    background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.9);
+    padding: 2px 6px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3);
+    cursor: pointer; white-space: nowrap; text-transform: uppercase;
+  }
+  .team-group-tag:hover { background: rgba(255,255,255,0.3); }
+  .team-group-tag.empty { opacity: 0.5; font-style: italic; text-transform: none; }
+  .team-owner { display: flex; align-items: center; gap: 5px; opacity: 0.92; }
+  .owner-avatar {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    font-size: 9px; font-weight: 700; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; border: 1px solid rgba(255,255,255,0.4);
+    letter-spacing: -0.5px;
+  }
+  .owner-name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
+  .team-label .add-project-btn {
+    background: rgba(255,255,255,0.25); border: none; color: #fff;
+    width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .team-label .add-project-btn:hover { background: rgba(255,255,255,0.4); }
+  .team-label-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .team-delete-btn { opacity: 0; transition: opacity 0.15s; background: rgba(255,80,80,0.3) !important; }
+  .team-label:hover .team-delete-btn { opacity: 1; }
+  .team-drag-handle {
+    background: none; border: none; color: rgba(255,255,255,0.5);
+    cursor: grab; font-size: 14px; padding: 2px 4px; flex-shrink: 0;
+    line-height: 1; user-select: none;
+  }
+  .team-drag-handle:hover { color: rgba(255,255,255,0.9); }
+  .team-section.drag-over { outline: 2px dashed rgba(255,107,53,0.5); outline-offset: -2px; border-radius: 4px; }
+  .team-section.dragging { opacity: 0.4; }
+
+  .team-collapse-btn {
+    background: rgba(255,255,255,0.2); border: none; color: #fff;
+    width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
+    font-size: 11px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: transform 0.2s;
+  }
+  .team-collapse-btn:hover { background: rgba(255,255,255,0.35); }
+  .team-collapse-btn.collapsed { transform: rotate(-90deg); }
+  .team-body { overflow: hidden; transition: max-height 0.25s ease; }
+  .team-body.collapsed { max-height: 0 !important; }
+
+  .project-name-cell {
+    padding: 6px 16px; font-size: 12px; color: #444;
+    border-right: 1px solid #e8e8e8;
+    display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  }
+  .project-name-cell > span { flex: 1; }
+  .project-name-row { display: flex; align-items: center; gap: 6px; }
+  .project-name-row > span { flex: 1; font-size: 12px; color: #333; font-weight: 500; }
+  .project-owner-row { display: flex; align-items: center; gap: 5px; }
+  .project-owner-avatar {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #e0e0e0; color: #666;
+    font-size: 8px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; letter-spacing: -0.5px;
+  }
+  .project-owner-name { font-size: 11px; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .project-actions { display: none; gap: 4px; }
+  .project-row:hover .project-actions { display: flex; }
+  .icon-btn {
+    background: none; border: none; cursor: pointer; padding: 2px 4px;
+    color: #999; font-size: 13px; border-radius: 3px;
+  }
+  .icon-btn:hover { background: #f0f0f0; color: #555; }
+
+  /* Phase bars */
+  .phase-bar {
+    position: absolute; height: 28px; border-radius: 5px;
+    display: flex; align-items: center; padding: 0 8px;
+    font-size: 11px; font-weight: 500; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+    cursor: grab; user-select: none; z-index: 2;
+  }
+  .phase-bar:hover { opacity: 0.85; }
+  .phase-bar.ux  { background: #d4b6f7; color: #5a3d8a; }
+  .phase-bar.dev { background: #5a5a6e; color: #e8e8ff; }
+
+  /* Done state */
+  .phase-bar.ux.ux-done { background: #b8e6c1; color: #1e6e3e; }
+  .phase-bar.ux.ux-done .bar-label { text-decoration: line-through; opacity: 0.75; }
+  .done-check-badge { color: #2a9d5c; font-size: 14px; flex-shrink: 0; margin-right: 3px; }
+
+  .resize-handle {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 6px;
+    cursor: ew-resize; border-radius: 0 5px 5px 0;
+    background: rgba(0,0,0,0.1); z-index: 3;
+  }
+  .resize-handle:hover { background: rgba(0,0,0,0.25); }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: #fff; border-radius: 12px; padding: 24px;
+    width: 480px; max-width: 95vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    transform: translateY(10px); transition: transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 18px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 500; color: #555; margin-bottom: 5px; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 13px; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: #FF6B35; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+  .btn-danger { background: #fff0f0; color: #cc3333; border: 1px solid #f5c6c6; }
+  .btn-danger:hover { background: #ffe0e0; }
+
+  /* Filter bar */
+  .filter-bar {
+    padding: 8px 24px; background: #fff; border-bottom: 1px solid #e8e8e8;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .filter-bar label { font-size: 12px; font-weight: 500; color: #888; }
+  .filter-select {
+    padding: 5px 10px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 12px; font-family: inherit; outline: none; background: #fafafa;
+    cursor: pointer; color: #333;
+  }
+  .filter-select:focus { border-color: #FF6B35; }
+  .filter-select.active { border-color: #FF6B35; background: #fff5f0; color: #FF6B35; font-weight: 600; }
+  .filter-clear { font-size: 12px; color: #aaa; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+  .filter-clear:hover { color: #FF6B35; background: #fff5f0; }
+
+  /* Backlog rows */
+  .backlog-section { border-top: 1px dashed #e8e8e8; }
+  .backlog-header {
+    display: grid; padding: 0;
+  }
+  .backlog-label {
+    padding: 5px 16px; font-size: 10px; font-weight: 600; color: #aaa;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    border-right: 1px solid #eee; display: flex; align-items: center; gap: 6px;
+  }
+  .backlog-row {
+    display: grid; border-top: 1px solid #f5f5f5;
+    background: #fff;
+  }
+  .backlog-name-cell {
+    padding: 7px 16px; font-size: 12px; color: #666;
+    border-right: 1px solid #eee;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .backlog-name-cell > span { flex: 1; }
+  .backlog-timeline {
+    border-right: 1px solid #f0f0f0;
+  }
+  .backlog-actions { display: none; gap: 4px; }
+  .backlog-row:hover .backlog-actions { display: flex; }
+  .backlog-row:hover { background: #f9f9f9; }
+
+  .add-team-row {
+    padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+    border-top: 1px dashed #ddd;
+  }
+  .add-team-row input {
+    flex: 1; padding: 7px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none;
+  }
+  .add-team-row input:focus { border-color: #FF6B35; }
+
+  .ux-done-toggle {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; color: #555; cursor: pointer;
+  }
+  .ux-done-toggle input { width: auto; cursor: pointer; }
+
+  /* Lock screen */
+  #lock-screen {
+    position: fixed; inset: 0; background: #f0f0f0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+  }
+  .lock-card {
+    background: #fff; border-radius: 16px; padding: 40px 48px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+    text-align: center; width: 320px;
+  }
+  .lock-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .lock-card p  { font-size: 13px; color: #888; margin-bottom: 24px; }
+  .lock-card input {
+    width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px;
+    font-size: 16px; text-align: center; letter-spacing: 4px; outline: none;
+    font-family: inherit; margin-bottom: 12px;
+  }
+  .lock-card input:focus { border-color: #FF6B35; }
+  .lock-card button {
+    width: 100%; padding: 12px; background: #FF6B35; color: #fff;
+    border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .lock-card button:hover { background: #e55a25; }
+  .lock-error { color: #e74c3c; font-size: 12px; margin-top: 8px; display:none; }
+</style>
+</head>
+<body>
+
+<div id="lock-screen">
+  <div class="lock-card">
+    <div style="font-size:36px;margin-bottom:16px;">🔒</div>
+    <h2>UX Roadmap H2 2026</h2>
+    <p>Enter the password to access</p>
+    <input id="lock-input" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')unlock()">
+    <button onclick="unlock()">Access</button>
+    <div class="lock-error" id="lock-error">Incorrect password</div>
+  </div>
+</div>
+
+<div class="app-header">
+  <h1>📅 Roadmap H2 2026</h1>
+  <div class="header-actions">
+    <button class="btn btn-secondary" onclick="exportHint()">⬇ Export</button>
+    <button class="btn btn-primary" onclick="openAddProject(null)">+ Add project</button>
+  </div>
+</div>
+
+<div class="legend">
+  <span style="font-size:12px;font-weight:600;color:#888;">Phases:</span>
+  <div class="legend-item"><div class="legend-dot" style="background:#d4b6f7;"></div> UX Design</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#b8e6c1;"></div> UX Done ✅</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5a5a6e;"></div> Development</div>
+  <span style="color:#ddd;margin:0 4px;">|</span>
+  <span style="font-size:12px;color:#aaa;">Drag to move · ↔ resize · Double-click to edit · Right-click UX bar → mark as done</span>
+</div>
+
+<div class="filter-bar">
+  <label>Filter by:</label>
+  <select class="filter-select" id="filter-group" onchange="applyFilters()">
+    <option value="">All groups</option>
+  </select>
+  <select class="filter-select" id="filter-owner" onchange="applyFilters()">
+    <option value="">All owners</option>
+  </select>
+  <span class="filter-clear" id="filter-clear" onclick="clearFilters()" style="display:none;">✕ Clear filters</span>
+</div>
+
+<div class="roadmap-wrapper">
+  <div class="roadmap" id="roadmap"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">Add project</h2>
+    <div class="form-group">
+      <label>Project name</label>
+      <input id="f-name" type="text" placeholder="e.g. Heavy order fee">
+    </div>
+    <div class="form-group">
+      <label>Team</label>
+      <select id="f-team"></select>
+    </div>
+    <div class="form-group">
+      <label>Owner</label>
+      <input id="f-owner" type="text" placeholder="e.g. Ana García" list="owners-list" autocomplete="off">
+      <datalist id="owners-list"></datalist>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:8px;background:#fff8f0;border:1px solid #ffe0c8;border-radius:6px;padding:8px 12px;">
+      <input id="f-backlog" type="checkbox" style="width:auto;cursor:pointer;">
+      <label for="f-backlog" style="margin:0;cursor:pointer;font-size:12px;color:#888;">Not prioritized — no dates yet</label>
+    </div>
+    <div id="f-dates-section">
+    <div style="background:#f9f9f9;border-radius:8px;padding:14px;margin-bottom:8px;" id="ux-phase-block">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:12px;font-weight:600;color:#555;">📐 UX Design phase</span>
+        <label class="ux-done-toggle">
+          <input id="f-ux-done" type="checkbox"> ✅ Done
+        </label>
+      </div>
+      <div class="form-row" style="grid-template-columns:2fr 1fr 1fr;">
+        <div class="form-group" style="margin:0">
+          <label>Start month</label>
+          <select id="f-ux-start"></select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Week</label>
+          <select id="f-ux-week">
+            <option value="1">W1</option><option value="2">W2</option>
+            <option value="3">W3</option><option value="4">W4</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Duration (w)</label>
+          <input id="f-ux-dur" type="number" min="1" max="32" value="4">
+        </div>
+      </div>
+    </div>
+    <div style="background:#f9f9f9;border-radius:8px;padding:14px;margin-bottom:4px;" id="dev-phase-block">
+      <div style="font-size:12px;font-weight:600;color:#555;margin-bottom:10px;">⚙️ Development phase</div>
+      <div class="form-row" style="grid-template-columns:2fr 1fr 1fr;">
+        <div class="form-group" style="margin:0">
+          <label>Start month</label>
+          <select id="f-dev-start"></select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Week</label>
+          <select id="f-dev-week">
+            <option value="1">W1</option><option value="2">W2</option>
+            <option value="3">W3</option><option value="4">W4</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Duration (w)</label>
+          <input id="f-dev-dur" type="number" min="1" max="32" value="6">
+        </div>
+      </div>
+    </div>
+    </div><!-- /f-dates-section -->
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="btn-delete" onclick="deleteProject()" style="display:none;margin-right:auto;">🗑 Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProject()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS = [
+  { key: 'may', label: 'May',       q: 'Q2', past: true  },
+  { key: 'jun', label: 'June',      q: 'Q2', past: true  },
+  { key: 'jul', label: 'July',      q: 'Q3', past: false },
+  { key: 'aug', label: 'August',    q: 'Q3', past: false },
+  { key: 'sep', label: 'September', q: 'Q3', past: false },
+  { key: 'oct', label: 'October',   q: 'Q4', past: false },
+  { key: 'nov', label: 'November',  q: 'Q4', past: false },
+  { key: 'dec', label: 'December',  q: 'Q4', past: false },
+];
+
+// Today marker: June 2 = index 1 (June), day 2/30 ≈ 6.7% into the month
+const TODAY_MONTH = 'jun';
+const TODAY_DAY_FRAC = 2 / 30;
+const MONTH_KEYS = MONTHS.map(m => m.key);
+const TEAM_COLORS = ['#FF6B35','#3355cc','#2c8a5a','#8b44ac','#c0392b','#0097a7','#e67e22','#546e7a'];
+
+function ownerInitials(name) {
+  if (!name) return '?';
+  return name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+}
+
+let state = {
+  teams: [
+    { id: 't1', name: 'Savings & Pricing', color: '#FF6B35', owner: 'Pedro Álvarez', group: 'Growth' },
+    { id: 't2', name: 'Checkout', color: '#3355cc', owner: '', group: '' },
+  ],
+  projects: [
+    // Savings & Pricing — Dev timings from roadmap, UX placeholders to adjust
+    { id:'p1',  teamId:'t1', name:'Heavy Order Fee',                         uxStart:'may', uxWeek:1, uxDur:4,  devStart:'jun', devWeek:1, devDur:13, uxDone:true,  owner:'Pedro Álvarez' },
+    { id:'p2',  teamId:'t1', name:'UOKiK Changes – Omnibus Disclaimer',      uxStart:'may', uxWeek:1, uxDur:4,  devStart:'jun', devWeek:3, devDur:6,  uxDone:true,  owner:'' },
+    { id:'p3',  teamId:'t1', name:'UOKiK Changes – Service Fee StoreWall',   uxStart:'may', uxWeek:1, uxDur:4,  devStart:'jun', devWeek:3, devDur:6,  uxDone:true,  owner:'' },
+    { id:'p4',  teamId:'t1', name:'UOKiK Changes – Stacking Cart & Checkout',uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:4, devDur:4,  uxDone:false, owner:'' },
+    { id:'p5',  teamId:'t1', name:'Best Promo in StoreWall',                 uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:1, devDur:4,  uxDone:false, owner:'' },
+    { id:'p6',  teamId:'t1', name:'Fee Communication – Regroup Fees',        uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:4, devDur:4,  uxDone:false, owner:'' },
+    { id:'p7',  teamId:'t1', name:'Accessibility Fees – a11y',               uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:4, devDur:4,  uxDone:false, owner:'' },
+    { id:'p8',  teamId:'t1', name:'Perishables Omnibus QC',                  uxStart:'aug', uxWeek:1, uxDur:4,  devStart:'sep', devWeek:1, devDur:4,  uxDone:false, owner:'' },
+    { id:'p9',  teamId:'t1', name:'Order Tabs Discounts',                    uxStart:'aug', uxWeek:1, uxDur:4,  devStart:'sep', devWeek:1, devDur:4,  uxDone:false, owner:'' },
+    { id:'p10', teamId:'t1', name:'Fee Communication – Surge UI Changes',    uxStart:'aug', uxWeek:1, uxDur:4,  devStart:'sep', devWeek:1, devDur:4,  uxDone:false, owner:'' },
+    { id:'p11', teamId:'t1', name:'BXGY',                                    uxStart:'sep', uxWeek:1, uxDur:4,  devStart:'oct', devWeek:1, devDur:13, uxDone:false, owner:'' },
+    { id:'p12', teamId:'t1', name:'2nd Item at 50% Off',                     uxStart:'sep', uxWeek:1, uxDur:4,  devStart:'oct', devWeek:1, devDur:13, uxDone:false, owner:'' },
+    { id:'p13', teamId:'t1', name:'Sponsored Deals',                         uxStart:'sep', uxWeek:1, uxDur:4,  devStart:'oct', devWeek:1, devDur:11, uxDone:false, owner:'' },
+    { id:'p14', teamId:'t1', name:'Ban and Delete',                          uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:1, devDur:13, uxDone:false, owner:'' },
+    { id:'p15', teamId:'t1', name:'Omnibus Service – Continuous Support',    uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:1, devDur:13, uxDone:false, owner:'' },
+    // Savings & Pricing — Backlog
+    { id:'b1', teamId:'t1', name:'Item Based Store Cards',  backlog:true, owner:'' },
+    { id:'b2', teamId:'t1', name:'QC Promos Banner',        backlog:true, owner:'' },
+    { id:'b3', teamId:'t1', name:'Discounted Delivery Fee', backlog:true, owner:'' },
+    // Checkout
+    { id:'p16', teamId:'t2', name:'Checkout redesign', uxStart:'jul', uxWeek:1, uxDur:6, devStart:'sep', devWeek:1, devDur:8, uxDone:false, owner:'' },
+  ]
+};
+
+// ── AUTH ──
+const PASSWORD_HASH = 'glopi2016'; // change this to your password
+
+async function unlock() {
+  const input = document.getElementById('lock-input').value;
+  // Simple hash check using Web Crypto
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
+
+  const correctBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(PASSWORD_HASH));
+  const correctHex = Array.from(new Uint8Array(correctBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
+
+  if (hashHex === correctHex) {
+    sessionStorage.setItem('roadmap-auth', '1');
+    document.getElementById('lock-screen').style.display = 'none';
+  } else {
+    const err = document.getElementById('lock-error');
+    err.style.display = 'block';
+    document.getElementById('lock-input').value = '';
+    document.getElementById('lock-input').focus();
+    setTimeout(() => err.style.display = 'none', 2000);
+  }
+}
+
+if (sessionStorage.getItem('roadmap-auth') === '1') {
+  document.getElementById('lock-screen').style.display = 'none';
+} else {
+  setTimeout(() => document.getElementById('lock-input').focus(), 100);
+}
+
+// ── SUPABASE ──
+const SUPABASE_URL  = 'https://orajrsmflibbjywgbxpa.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yYWpyc21mbGliYmp5d2dieHBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0Njg1NjQsImV4cCI6MjA5NjA0NDU2NH0.qKLEbXhj96OAiM6v_WX7nZEK2gKaq3DDcvO4i6_c1gg';
+let sb = null;
+try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e) { console.warn('Supabase init failed', e); }
+
+async function loadStateRemote() {
+  if (!sb) return null;
+  const { data, error } = await sb.from('roadmap_state').select('state').eq('id', 1).single();
+  if (error || !data) return null;
+  return data.state;
+}
+
+function showSaveStatus(msg, color) {
+  let el = document.getElementById('save-status');
+  if (!el) { el = document.createElement('span'); el.id = 'save-status'; el.style.cssText = 'font-size:11px;padding:3px 8px;border-radius:4px;margin-left:8px;'; document.querySelector('.app-header').appendChild(el); }
+  el.textContent = msg; el.style.background = color; el.style.color = '#fff';
+  clearTimeout(el._t); el._t = setTimeout(() => el.textContent = '', 3000);
+}
+
+async function saveState() {
+  if (!sb) { showSaveStatus('⚠ Supabase not connected', '#e67e22'); return; }
+  showSaveStatus('Saving...', '#aaa');
+  const { error } = await sb.from('roadmap_state').upsert({ id: 1, state, updated_at: new Date().toISOString() });
+  if (error) { showSaveStatus('✗ Error: ' + error.message, '#e74c3c'); console.error(error); }
+  else { showSaveStatus('✓ Saved', '#2ecc71'); }
+}
+
+let activeFilters = { group: '', owner: '' };
+
+function applyFilters() {
+  activeFilters.group = document.getElementById('filter-group').value;
+  activeFilters.owner = document.getElementById('filter-owner').value;
+  const hasFilter = activeFilters.group || activeFilters.owner;
+  document.getElementById('filter-clear').style.display = hasFilter ? 'inline' : 'none';
+  document.getElementById('filter-group').classList.toggle('active', !!activeFilters.group);
+  document.getElementById('filter-owner').classList.toggle('active', !!activeFilters.owner);
+  render();
+}
+
+function clearFilters() {
+  activeFilters = { group: '', owner: '' };
+  document.getElementById('filter-group').value = '';
+  document.getElementById('filter-owner').value = '';
+  document.getElementById('filter-clear').style.display = 'none';
+  document.getElementById('filter-group').classList.remove('active');
+  document.getElementById('filter-owner').classList.remove('active');
+  render();
+}
+
+function refreshFilterOptions() {
+  const groups = [...new Set(state.teams.map(t => t.group).filter(Boolean))].sort();
+  const owners = [...new Set(state.projects.map(p => p.owner).filter(Boolean))].sort();
+
+  const gSel = document.getElementById('filter-group');
+  const oCel = document.getElementById('filter-owner');
+  if (!gSel || !oCel) return;
+
+  const gVal = gSel.value;
+  gSel.innerHTML = '<option value="">All groups</option>' + groups.map(g => `<option value="${g}"${g===gVal?' selected':''}>${g}</option>`).join('');
+
+  const oVal = oCel.value;
+  oCel.innerHTML = '<option value="">All owners</option>' + owners.map(o => `<option value="${o}"${o===oVal?' selected':''}>${o}</option>`).join('');
+}
+
+
+const TEAM_COL = 220;
+const MONTH_COL = 120;
+
+function render() {
+  const roadmap = document.getElementById('roadmap');
+  roadmap.innerHTML = '';
+  const gridCols = `${TEAM_COL}px repeat(${MONTH_KEYS.length}, ${MONTH_COL}px)`;
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.style.cssText = `display:grid; grid-template-columns:${gridCols}; grid-template-rows:auto auto; border-bottom:2px solid #e0e0e0;`;
+
+  const teamCell = document.createElement('div');
+  teamCell.className = 'th-team';
+  teamCell.textContent = 'Team / Project';
+  hdr.appendChild(teamCell);
+
+  const quarters = {};
+  MONTHS.forEach(m => { if (!quarters[m.q]) quarters[m.q]={count:0,past:m.past}; quarters[m.q].count++; if(!m.past) quarters[m.q].past=false; });
+  Object.entries(quarters).forEach(([q, info]) => {
+    const c = document.createElement('div');
+    c.className = 'th-quarter' + (info.past ? ' past' : '');
+    c.style.cssText = `grid-column:span ${info.count}; border-right:1px solid #e0e0e0;`;
+    c.textContent = q;
+    hdr.appendChild(c);
+  });
+
+  hdr.appendChild(Object.assign(document.createElement('div'), { style: 'background:#fafafa;border-right:1px solid #e0e0e0;' }));
+  MONTHS.forEach(m => {
+    const c = document.createElement('div');
+    c.className = 'th-month' + (m.past ? ' past' : '');
+    c.innerHTML = `<div style="padding:3px 0 2px;">${m.label}</div>
+      <div class="week-ticks">
+        <div class="week-tick">W1</div><div class="week-tick">W2</div>
+        <div class="week-tick">W3</div><div class="week-tick">W4</div>
+      </div>`;
+    hdr.appendChild(c);
+  });
+  hdr.style.position = 'relative';
+  const todayIdx = MONTH_KEYS.indexOf(TODAY_MONTH);
+  if (todayIdx >= 0) {
+    const todayX = TEAM_COL + todayIdx * MONTH_COL + TODAY_DAY_FRAC * MONTH_COL;
+    const tl = document.createElement('div');
+    tl.style.cssText = `position:absolute;top:0;bottom:0;left:${todayX}px;width:2px;background:#FF6B35;z-index:5;pointer-events:none;`;
+    hdr.appendChild(tl);
+    const lbl = document.createElement('div');
+    lbl.className = 'today-label';
+    lbl.style.left = todayX + 'px';
+    lbl.textContent = 'Today';
+    hdr.appendChild(lbl);
+  }
+  roadmap.appendChild(hdr);
+
+  // Build unique emoji map for all owners
+  const allOwners = [...new Set([
+    ...state.teams.map(t => t.owner),
+    ...state.projects.map(p => p.owner)
+  ].filter(Boolean))];
+
+  // Body wrapper for the today overlay
+  const body = document.createElement('div');
+  body.className = 'roadmap-body';
+
+  // Teams
+  const visibleTeams = state.teams.filter(team => {
+    if (activeFilters.group && team.group !== activeFilters.group) return false;
+    return true;
+  });
+
+  visibleTeams.forEach(team => {
+    let projects = state.projects.filter(p => p.teamId === team.id);
+    if (activeFilters.owner) {
+      projects = projects.filter(p => p.owner === activeFilters.owner);
+    }
+    const section = document.createElement('div');
+    section.className = 'team-section';
+    section.draggable = true;
+    section.dataset.teamId = team.id;
+    section.addEventListener('dragstart', e => {
+      if (!e.target.classList.contains('team-drag-handle')) {
+        e.preventDefault(); return;
+      }
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', team.id);
+      setTimeout(() => section.classList.add('dragging'), 0);
+    });
+    section.addEventListener('dragend', () => section.classList.remove('dragging'));
+    section.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      section.classList.add('drag-over');
+    });
+    section.addEventListener('dragleave', () => section.classList.remove('drag-over'));
+    section.addEventListener('drop', e => {
+      e.preventDefault();
+      section.classList.remove('drag-over');
+      const fromId = e.dataTransfer.getData('text/plain');
+      const toId = team.id;
+      if (fromId === toId) return;
+      const fromIdx = state.teams.findIndex(t => t.id === fromId);
+      const toIdx   = state.teams.findIndex(t => t.id === toId);
+      const [moved] = state.teams.splice(fromIdx, 1);
+      state.teams.splice(toIdx, 0, moved);
+      saveState(); render();
+    });
+
+    const teamRow = document.createElement('div');
+    teamRow.style.cssText = `display:grid; grid-template-columns:${gridCols};`;
+    const lbl = document.createElement('div');
+    lbl.className = 'team-label';
+    lbl.style.background = team.color;
+    const ownerHtml = team.owner
+      ? `<div class="team-owner" title="Click to edit owner" onclick="editTeamOwner('${team.id}')" style="cursor:pointer;"><div class="owner-avatar">${ownerInitials(team.owner)}</div><span class="owner-name">${team.owner}</span></div>`
+      : `<div class="team-owner" onclick="editTeamOwner('${team.id}')" style="cursor:pointer;opacity:0.6;"><span class="owner-name">+ Owner</span></div>`;
+    const isCollapsed = (state.collapsed || {})[team.id];
+    const groupTag = team.group
+      ? `<span class="team-group-tag" title="Click to edit group" onclick="editTeamGroup('${team.id}')">${team.group}</span>`
+      : `<span class="team-group-tag empty" title="Click to add group" onclick="editTeamGroup('${team.id}')">+ group</span>`;
+    lbl.innerHTML = `
+      <span class="team-drag-handle" title="Drag to reorder">⠿</span>
+      <button class="team-collapse-btn${isCollapsed ? ' collapsed' : ''}" onclick="toggleTeam('${team.id}')" title="Collapse/expand">▾</button>
+      <div class="team-label-left">
+        ${groupTag}
+        <span class="team-label-name">${team.name}</span>
+        ${ownerHtml}
+      </div>
+      <button class="add-project-btn" title="Add project" onclick="openAddProject('${team.id}')">+</button>
+      <button class="add-project-btn team-delete-btn" title="Delete team" onclick="deleteTeam('${team.id}')">🗑</button>`;
+    teamRow.appendChild(lbl);
+    MONTHS.forEach(m => {
+      const c = document.createElement('div');
+      const bg = m.past ? '#f5f5f5' : `${team.color}08`;
+      c.style.cssText = `background:${bg}; border-right:1px solid ${team.color}18; min-height:8px;`;
+      teamRow.appendChild(c);
+    });
+    section.appendChild(teamRow);
+
+    const teamBody = document.createElement('div');
+    teamBody.className = 'team-body' + (isCollapsed ? ' collapsed' : '');
+    if (!isCollapsed) teamBody.style.maxHeight = '9999px';
+
+    if (projects.length === 0) {
+      const er = document.createElement('div');
+      er.style.cssText = `padding:14px; color:#bbb; font-size:12px; font-style:italic; text-align:center;`;
+      er.textContent = 'No projects yet — use + to add one';
+      teamBody.appendChild(er);
+    }
+
+    const active  = projects.filter(p => !p.backlog);
+    const backlog = projects.filter(p =>  p.backlog);
+
+    active.forEach(p => teamBody.appendChild(buildProjectRow(p, team, gridCols, allOwners)));
+
+    if (backlog.length > 0) {
+      const bSection = document.createElement('div');
+      bSection.className = 'backlog-section';
+
+      // Backlog header label
+      const bHdr = document.createElement('div');
+      bHdr.style.cssText = `display:grid; grid-template-columns:${gridCols};`;
+      const bLbl = document.createElement('div');
+      bLbl.className = 'backlog-label';
+      bLbl.innerHTML = `<span>Not prioritized</span>`;
+      bHdr.appendChild(bLbl);
+      // Fill remaining columns
+      MONTHS.forEach(() => {
+        const c = document.createElement('div');
+        c.style.cssText = `border-right:1px solid #f5f5f5; background:#fafafa;`;
+        bHdr.appendChild(c);
+      });
+      bSection.appendChild(bHdr);
+
+      backlog.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'backlog-row';
+        row.style.cssText = `display:grid; grid-template-columns:${gridCols};`;
+
+        const cell = document.createElement('div');
+        cell.className = 'backlog-name-cell';
+        cell.innerHTML = `
+          <span>${p.name}</span>
+          <div class="backlog-actions">
+            <button class="icon-btn" title="Edit" onclick="openEditProject('${p.id}')">✏️</button>
+          </div>`;
+        row.appendChild(cell);
+
+        // Timeline area — just a striped placeholder
+        const tl = document.createElement('div');
+        tl.className = 'backlog-timeline';
+        tl.style.cssText = `grid-column:2/${2+MONTH_KEYS.length};`;
+        row.appendChild(tl);
+
+        bSection.appendChild(row);
+      });
+      teamBody.appendChild(bSection);
+    }
+
+    section.appendChild(teamBody);
+    body.appendChild(section);
+  });
+
+  // Single today line over the full body
+  const todayIdx2 = MONTH_KEYS.indexOf(TODAY_MONTH);
+  if (todayIdx2 >= 0) {
+    const todayX = TEAM_COL + todayIdx2 * MONTH_COL + TODAY_DAY_FRAC * MONTH_COL;
+    const tl = document.createElement('div');
+    tl.style.cssText = `position:absolute;top:0;bottom:0;left:${todayX}px;width:2px;background:#FF6B35;z-index:10;pointer-events:none;`;
+    body.appendChild(tl);
+  }
+
+  roadmap.appendChild(body);
+
+  refreshFilterOptions();
+
+  // Add team
+  const at = document.createElement('div');
+  at.className = 'add-team-row';
+  at.innerHTML = `
+    <input id="new-team-name" placeholder="Team name..." onkeydown="if(event.key==='Enter')addTeam()" style="flex:2;">
+    <input id="new-team-group" placeholder="Group (e.g. Growth)" onkeydown="if(event.key==='Enter')addTeam()" style="flex:1.5;">
+    <input id="new-team-owner" placeholder="Owner" onkeydown="if(event.key==='Enter')addTeam()" style="flex:1.5;">
+    <button class="btn btn-secondary" onclick="addTeam()">+ Team</button>`;
+  roadmap.appendChild(at);
+
+  populateFormSelects();
+}
+
+function buildProjectRow(project, team, gridCols, allOwners) {
+  const row = document.createElement('div');
+  row.className = 'project-row';
+  row.style.cssText = `display:grid; grid-template-columns:${gridCols}; border-top:1px solid #f0f0f0; position:relative;`;
+
+  const nameCell = document.createElement('div');
+  nameCell.className = 'project-name-cell';
+  const ownerRow = project.owner
+    ? `<div class="project-owner-row"><div class="project-owner-avatar">${ownerInitials(project.owner)}</div><span class="project-owner-name">${project.owner}</span></div>`
+    : `<div class="project-owner-row"><span class="project-owner-name" style="color:#ccc;font-style:italic;">No owner</span></div>`;
+  nameCell.innerHTML = `
+    <div class="project-name-row">
+      <span>${project.name}</span>
+      <div class="project-actions">
+        <button class="icon-btn" title="Edit" onclick="openEditProject('${project.id}')">✏️</button>
+      </div>
+    </div>
+    ${ownerRow}`;
+  row.appendChild(nameCell);
+
+  const barContainer = document.createElement('div');
+  barContainer.style.cssText = `position:relative; grid-column:2/${2+MONTH_KEYS.length}; min-height:52px;`;
+
+  // Grid lines + past shading
+  MONTHS.forEach((m, i) => {
+    const line = document.createElement('div');
+    line.style.cssText = `position:absolute;top:0;bottom:0;left:${i*MONTH_COL}px;width:1px;background:#ebebeb;z-index:1;`;
+    barContainer.appendChild(line);
+    if (m.past) {
+      const shade = document.createElement('div');
+      shade.style.cssText = `position:absolute;top:0;bottom:0;left:${i*MONTH_COL}px;width:${MONTH_COL}px;background:rgba(0,0,0,0.03);z-index:1;pointer-events:none;`;
+      barContainer.appendChild(shade);
+    }
+  });
+
+
+  barContainer.appendChild(createBar(project, 'ux'));
+  barContainer.appendChild(createBar(project, 'dev'));
+  row.appendChild(barContainer);
+  return row;
+}
+
+function createBar(project, phase) {
+  const isDone = phase === 'ux' && project.uxDone;
+  const bar = document.createElement('div');
+  bar.className = `phase-bar ${phase}${isDone ? ' ux-done' : ''}`;
+
+  const startKey  = phase === 'ux' ? project.uxStart : project.devStart;
+  const startWeek = phase === 'ux' ? (project.uxWeek || 1) : (project.devWeek || 1);
+  const dur       = phase === 'ux' ? project.uxDur   : project.devDur;
+  const WEEK = MONTH_COL / 4;
+  const top = phase === 'ux' ? 8 : (
+    project.uxStart === project.devStart && project.uxWeek === project.devWeek ? 34 : 8
+  );
+  const x = MONTH_KEYS.indexOf(startKey) * MONTH_COL + (startWeek - 1) * WEEK;
+  const w = dur * WEEK;
+
+  bar.style.cssText = `left:${x}px; width:${w}px; top:${top}px; position:absolute; height:28px; border-radius:5px; display:flex; align-items:center; padding:0 8px; font-size:11px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:grab; user-select:none; z-index:2;`;
+
+  const icon = isDone ? '✅' : (phase === 'ux' ? '✏️' : '⚙️');
+  bar.innerHTML = `${icon} <span class="bar-label" style="margin-left:4px;${isDone?'text-decoration:line-through;opacity:0.7;':''}">${project.name}</span>`;
+
+  // Resize handle
+  const handle = document.createElement('div');
+  handle.className = 'resize-handle';
+  bar.appendChild(handle);
+
+  // Right-click on UX bar toggles done
+  if (phase === 'ux') {
+    bar.title = 'Right-click → mark/unmark UX as done';
+    bar.addEventListener('contextmenu', e => {
+      e.preventDefault(); e.stopPropagation();
+      const proj = state.projects.find(p => p.id === project.id);
+      proj.uxDone = !proj.uxDone;
+      saveState(); render();
+    });
+  }
+
+  // Double click → edit modal
+  bar.addEventListener('dblclick', e => { e.stopPropagation(); openEditProject(project.id); });
+
+  setupDrag(bar, project, phase);
+  setupResize(handle, bar, project, phase);
+  return bar;
+}
+
+function setupDrag(bar, project, phase) {
+  bar.addEventListener('pointerdown', e => {
+    if (e.target.classList.contains('resize-handle')) return;
+    e.preventDefault();
+
+    const snap = MONTH_COL / 4;
+    const startMouseX = e.clientX;
+    const startLeft = bar.offsetLeft;
+    let currentLeft = startLeft;
+
+    bar.setPointerCapture(e.pointerId);
+    bar.style.cursor = 'grabbing';
+    bar.style.opacity = '0.75';
+    bar.style.zIndex = '10';
+
+    const onMove = ev => {
+      const raw = Math.max(0, startLeft + ev.clientX - startMouseX);
+      currentLeft = Math.round(raw / snap) * snap;
+      bar.style.left = currentLeft + 'px';
+    };
+
+    const onUp = () => {
+      bar.style.cursor = 'grab';
+      bar.style.opacity = '1';
+      bar.style.zIndex = '2';
+
+      const WEEK = MONTH_COL / 4;
+      const totalWeeks = Math.round(currentLeft / WEEK);
+      const monthIdx = Math.max(0, Math.min(MONTH_KEYS.length - 1, Math.floor(totalWeeks / 4)));
+      const weekInMonth = Math.max(1, Math.min(4, (totalWeeks % 4) + 1));
+
+      const proj = state.projects.find(p => p.id === project.id);
+      if (phase === 'ux') { proj.uxStart = MONTH_KEYS[monthIdx]; proj.uxWeek = weekInMonth; }
+      else { proj.devStart = MONTH_KEYS[monthIdx]; proj.devWeek = weekInMonth; }
+
+      bar.removeEventListener('pointermove', onMove);
+      bar.removeEventListener('pointerup', onUp);
+      saveState();
+      render();
+    };
+
+    bar.addEventListener('pointermove', onMove);
+    bar.addEventListener('pointerup', onUp);
+  });
+}
+
+function setupResize(handle, bar, project, phase) {
+  handle.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const snap = MONTH_COL / 4;
+    const startX = e.clientX;
+    const startW = bar.offsetWidth;
+    let currentW = startW;
+
+    handle.setPointerCapture(e.pointerId);
+
+    const onMove = ev => {
+      const raw = startW + ev.clientX - startX;
+      currentW = Math.max(snap, Math.round(raw / snap) * snap);
+      bar.style.width = currentW + 'px';
+    };
+    const onUp = () => {
+      const weeks = Math.max(1, Math.round(currentW / snap));
+      const proj = state.projects.find(p => p.id === project.id);
+      if (phase === 'ux') proj.uxDur = weeks; else proj.devDur = weeks;
+      handle.removeEventListener('pointermove', onMove);
+      handle.removeEventListener('pointerup', onUp);
+      saveState(); render();
+    };
+    handle.addEventListener('pointermove', onMove);
+    handle.addEventListener('pointerup', onUp);
+  });
+}
+
+// ── MODAL ──
+let editingProjectId = null;
+
+function populateFormSelects() {
+  const ts = document.getElementById('f-team'); if (!ts) return;
+  const tv = ts.value;
+  ts.innerHTML = state.teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  if (tv) ts.value = tv;
+  ['f-ux-start','f-dev-start'].forEach(id => {
+    const s = document.getElementById(id); if (!s) return;
+    const v = s.value;
+    s.innerHTML = MONTHS.map(m => `<option value="${m.key}">${m.label}</option>`).join('');
+    if (v) s.value = v;
+  });
+}
+
+function openAddProject(teamId) {
+  editingProjectId = null;
+  document.getElementById('modal-title').textContent = 'Add project';
+  document.getElementById('btn-delete').style.display = 'none';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-owner').value = '';
+  document.getElementById('f-backlog').checked = false;
+  toggleBacklogUI();
+  document.getElementById('f-ux-done').checked = false;
+  document.getElementById('f-ux-start').value = 'jul';
+  document.getElementById('f-ux-week').value = '1';
+  document.getElementById('f-ux-dur').value = '4';
+  document.getElementById('f-dev-start').value = 'aug';
+  document.getElementById('f-dev-week').value = '1';
+  document.getElementById('f-dev-dur').value = '6';
+  if (teamId) document.getElementById('f-team').value = teamId;
+  refreshOwnersList();
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('f-name').focus();
+}
+
+function openEditProject(id) {
+  editingProjectId = id;
+  const p = state.projects.find(x => x.id === id); if (!p) return;
+  document.getElementById('modal-title').textContent = 'Edit project';
+  document.getElementById('btn-delete').style.display = 'block';
+  document.getElementById('f-name').value = p.name;
+  document.getElementById('f-owner').value = p.owner || '';
+  document.getElementById('f-team').value = p.teamId;
+  document.getElementById('f-backlog').checked = !!p.backlog;
+  toggleBacklogUI();
+  document.getElementById('f-ux-done').checked = !!p.uxDone;
+  document.getElementById('f-ux-start').value = p.uxStart;
+  document.getElementById('f-ux-week').value = p.uxWeek || 1;
+  document.getElementById('f-ux-dur').value = p.uxDur;
+  document.getElementById('f-dev-start').value = p.devStart;
+  document.getElementById('f-dev-week').value = p.devWeek || 1;
+  document.getElementById('f-dev-dur').value = p.devDur;
+  refreshOwnersList();
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); editingProjectId = null; }
+
+function toggleBacklogUI() {
+  const isBacklog = document.getElementById('f-backlog').checked;
+  document.getElementById('f-dates-section').style.display = isBacklog ? 'none' : 'block';
+}
+
+function refreshOwnersList() {
+  const names = new Set();
+  state.teams.forEach(t => { if (t.owner) names.add(t.owner); });
+  state.projects.forEach(p => { if (p.owner) names.add(p.owner); });
+  const dl = document.getElementById('owners-list');
+  if (dl) dl.innerHTML = [...names].sort().map(n => `<option value="${n}">`).join('');
+}
+
+function saveProject() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { document.getElementById('f-name').focus(); return; }
+  const data = {
+    name,
+    owner:    document.getElementById('f-owner').value.trim(),
+    backlog:  document.getElementById('f-backlog').checked,
+    teamId:   document.getElementById('f-team').value,
+    uxDone:   document.getElementById('f-ux-done').checked,
+    uxStart:  document.getElementById('f-ux-start').value,
+    uxWeek:   parseInt(document.getElementById('f-ux-week').value) || 1,
+    uxDur:    parseInt(document.getElementById('f-ux-dur').value) || 4,
+    devStart: document.getElementById('f-dev-start').value,
+    devWeek:  parseInt(document.getElementById('f-dev-week').value) || 1,
+    devDur:   parseInt(document.getElementById('f-dev-dur').value) || 6,
+  };
+  if (editingProjectId) {
+    Object.assign(state.projects.find(p => p.id === editingProjectId), data);
+  } else {
+    state.projects.push({ id: 'p' + Date.now(), ...data });
+  }
+  saveState(); closeModal(); render();
+}
+
+function deleteProject() {
+  if (!editingProjectId) return;
+  state.projects = state.projects.filter(p => p.id !== editingProjectId);
+  saveState(); closeModal(); render();
+}
+
+function addTeam() {
+  const input = document.getElementById('new-team-name');
+  const name = input.value.trim(); if (!name) return;
+  const group = (document.getElementById('new-team-group').value || '').trim();
+  const owner = (document.getElementById('new-team-owner').value || '').trim();
+  state.teams.push({ id: 't' + Date.now(), name, group, owner, color: TEAM_COLORS[state.teams.length % TEAM_COLORS.length] });
+  input.value = ''; document.getElementById('new-team-group').value = ''; document.getElementById('new-team-owner').value = '';
+  saveState(); render();
+}
+
+function deleteTeam(teamId) {
+  const team = state.teams.find(t => t.id === teamId);
+  if (!team) return;
+  const projectCount = state.projects.filter(p => p.teamId === teamId).length;
+  const msg = projectCount > 0
+    ? `Delete "${team.name}" and its ${projectCount} project(s)?`
+    : `Delete "${team.name}"?`;
+  if (!confirm(msg)) return;
+  state.teams = state.teams.filter(t => t.id !== teamId);
+  state.projects = state.projects.filter(p => p.teamId !== teamId);
+  saveState(); render();
+}
+
+function toggleTeam(teamId) {
+  if (!state.collapsed) state.collapsed = {};
+  state.collapsed[teamId] = !state.collapsed[teamId];
+  saveState(); render();
+}
+
+function editTeamGroup(teamId) {
+  const team = state.teams.find(t => t.id === teamId);
+  if (!team) return;
+  const val = prompt(`Group for "${team.name}":`, team.group || '');
+  if (val === null) return;
+  team.group = val.trim();
+  saveState(); render();
+}
+
+function editTeamOwner(teamId) {
+  const team = state.teams.find(t => t.id === teamId);
+  if (!team) return;
+  const val = prompt(`Owner of "${team.name}":`, team.owner || '');
+  if (val === null) return;
+  team.owner = val.trim();
+  saveState(); render();
+}
+
+function exportHint() {
+  alert('Use Cmd+Shift+4 (Mac) to capture the roadmap, or Cmd+P → Save as PDF to export it.');
+}
+
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+document.getElementById('f-backlog').addEventListener('change', toggleBacklogUI);
+
+(async () => {
+  try {
+    document.getElementById('roadmap').innerHTML = '<div style="padding:40px;text-align:center;color:#aaa;font-size:13px;">Loading roadmap...</div>';
+    const remote = await loadStateRemote();
+    if (remote) state = remote;
+  } catch(e) {
+    console.warn('Supabase load failed, using default state', e);
+  }
+  render();
+})();
+</script>
+</body>
+</html>
