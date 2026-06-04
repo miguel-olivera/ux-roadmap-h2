@@ -11,6 +11,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif; background: #f0f0f0; color: #1a1a1a; }
+  *, input, select, button, textarea { font-family: inherit; }
 
   .app-header {
     background: #fff;
@@ -37,8 +38,9 @@
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #555; }
   .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
 
-  .roadmap-wrapper { overflow-x: auto; padding: 20px 24px; }
-  .roadmap { min-width: 900px; background: #fff; border-radius: 10px; border: 1px solid #e0e0e0; overflow: hidden; position: relative; }
+  .roadmap-wrapper { padding: 20px 24px 0; }
+  .roadmap-scroll  { overflow-x: auto; padding-bottom: 20px; }
+  .roadmap { min-width: 900px; background: #fff; border-radius: 10px; border: 1px solid #e0e0e0; overflow: visible; position: relative; }
   .roadmap-body { position: relative; }
 
   .th-team { background: #fafafa; font-weight: 600; font-size: 12px; color: #666;
@@ -353,8 +355,7 @@
 <div class="app-header">
   <h1 style="cursor:pointer;" onclick="toggleAuditLog()" title="Click to view activity log">📅 Roadmap H2 2026</h1>
   <div class="header-actions">
-    <button class="btn btn-secondary" onclick="exportHint()">⬇ Export</button>
-    <button class="btn btn-primary" onclick="openAddProject(null)">+ Add project</button>
+<button class="btn btn-primary" onclick="openAddProject(null)">+ Add project</button>
   </div>
 </div>
 
@@ -379,7 +380,14 @@
 </div>
 
 <div class="roadmap-wrapper">
-  <div class="roadmap" id="roadmap"></div>
+  <!-- Sticky header: outside overflow-x so sticky works relative to viewport -->
+  <div id="sticky-hdr-wrap" style="position:sticky;top:0;z-index:50;background:#fff;overflow-x:hidden;overflow-y:visible;border:1px solid #e0e0e0;border-bottom:2px solid #e0e0e0;border-radius:10px 10px 0 0;">
+    <div id="sticky-hdr-inner" style="will-change:transform;min-width:max-content;"></div>
+  </div>
+  <!-- Horizontally scrollable body -->
+  <div class="roadmap-scroll" id="roadmap-scroll-wrap" style="overflow-x:auto;">
+    <div class="roadmap" id="roadmap" style="border-radius:0 0 10px 10px;border-top:none;"></div>
+  </div>
 </div>
 
 <!-- Modal -->
@@ -708,7 +716,7 @@ function render() {
 
   // ── Header (3 rows: quarter / month / week) ──
   const hdr = document.createElement('div');
-  hdr.style.cssText = `display:grid; grid-template-columns:${gridCols}; grid-template-rows:auto auto auto; border-bottom:2px solid #e0e0e0; position:relative;`;
+  hdr.style.cssText = `display:grid; grid-template-columns:${gridCols}; grid-template-rows:auto auto auto; position:relative; background:#fff;`;
 
   // Row 1: team label + quarter spans
   hdr.appendChild(Object.assign(document.createElement('div'), { className:'th-team', style:'grid-row:1;', textContent:'Team / Project' }));
@@ -751,7 +759,16 @@ function render() {
     lbl.className='today-label'; lbl.style.left=todayX+'px'; lbl.textContent='Today';
     hdr.appendChild(lbl);
   }
-  roadmap.appendChild(hdr);
+  // Put header in sticky container, body in scrollable area
+  const stickyInner = document.getElementById('sticky-hdr-inner');
+  stickyInner.innerHTML = '';
+  stickyInner.appendChild(hdr);
+
+  // Sync horizontal scroll: move header inner div to mirror body scroll
+  const scrollWrap = document.getElementById('roadmap-scroll-wrap');
+  scrollWrap.onscroll = () => {
+    stickyInner.style.transform = `translateX(-${scrollWrap.scrollLeft}px)`;
+  };
 
   // Build unique emoji map for all owners
   const allOwners = [...new Set([
