@@ -473,58 +473,9 @@ function ownerInitials(name) {
   return name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
 }
 
-let state = {
-  teams: [
-    { id: 't1', name: 'Savings & Pricing', color: '#FF6B35', owner: 'Pedro Álvarez', group: 'Growth' },
-    { id: 't2', name: 'Checkout', color: '#3355cc', owner: '', group: '' },
-    { id: 't3', name: 'Search & Product Page', color: '#2c8a5a', owner: '', group: '' },
-  ],
-  projects: [
-    // Savings & Pricing — Dev timings from roadmap, UX placeholders to adjust
-    { id:'p1',  teamId:'t1', name:'Heavy Order Fee',                         uxStart:'may', uxWeek:1, uxDur:4,  devStart:'jun', devWeek:1, devDur:13, uxDone:true,  owner:'Pedro Álvarez' },
-    { id:'p2',  teamId:'t1', name:'UOKiK Changes – Omnibus Disclaimer',      uxStart:'may', uxWeek:1, uxDur:4,  devStart:'jun', devWeek:3, devDur:6,  uxDone:true,  owner:'' },
-    { id:'p3',  teamId:'t1', name:'UOKiK Changes – Service Fee StoreWall',   uxStart:'may', uxWeek:1, uxDur:4,  devStart:'jun', devWeek:3, devDur:6,  uxDone:true,  owner:'' },
-    { id:'p4',  teamId:'t1', name:'UOKiK Changes – Stacking Cart & Checkout',uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:4, devDur:4,  uxDone:false, owner:'' },
-    { id:'p5',  teamId:'t1', name:'Best Promo in StoreWall',                 uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:1, devDur:4,  uxDone:false, owner:'' },
-    { id:'p6',  teamId:'t1', name:'Fee Communication – Regroup Fees',        uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:4, devDur:4,  uxDone:false, owner:'' },
-    { id:'p7',  teamId:'t1', name:'Accessibility Fees – a11y',               uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:4, devDur:4,  uxDone:false, owner:'' },
-    { id:'p8',  teamId:'t1', name:'Perishables Omnibus QC',                  uxStart:'aug', uxWeek:1, uxDur:4,  devStart:'sep', devWeek:1, devDur:4,  uxDone:false, owner:'' },
-    { id:'p9',  teamId:'t1', name:'Order Tabs Discounts',                    uxStart:'aug', uxWeek:1, uxDur:4,  devStart:'sep', devWeek:1, devDur:4,  uxDone:false, owner:'' },
-    { id:'p10', teamId:'t1', name:'Fee Communication – Surge UI Changes',    uxStart:'aug', uxWeek:1, uxDur:4,  devStart:'sep', devWeek:1, devDur:4,  uxDone:false, owner:'' },
-    { id:'p11', teamId:'t1', name:'BXGY',                                    uxStart:'sep', uxWeek:1, uxDur:4,  devStart:'oct', devWeek:1, devDur:13, uxDone:false, owner:'' },
-    { id:'p12', teamId:'t1', name:'2nd Item at 50% Off',                     uxStart:'sep', uxWeek:1, uxDur:4,  devStart:'oct', devWeek:1, devDur:13, uxDone:false, owner:'' },
-    { id:'p13', teamId:'t1', name:'Sponsored Deals',                         uxStart:'sep', uxWeek:1, uxDur:4,  devStart:'oct', devWeek:1, devDur:11, uxDone:false, owner:'' },
-    { id:'p14', teamId:'t1', name:'Ban and Delete',                          uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:1, devDur:13, uxDone:false, owner:'' },
-    { id:'p15', teamId:'t1', name:'Omnibus Service – Continuous Support',    uxStart:'jun', uxWeek:1, uxDur:4,  devStart:'jul', devWeek:1, devDur:13, uxDone:false, owner:'' },
-    // Savings & Pricing — Backlog
-    { id:'b1', teamId:'t1', name:'Item Based Store Cards',  backlog:true, owner:'' },
-    { id:'b2', teamId:'t1', name:'QC Promos Banner',        backlog:true, owner:'' },
-    { id:'b3', teamId:'t1', name:'Discounted Delivery Fee', backlog:true, owner:'' },
-    // Checkout
-    { id:'p16', teamId:'t2', name:'Checkout redesign', uxStart:'jul', uxWeek:1, uxDur:6, devStart:'sep', devWeek:1, devDur:8, uxDone:false, owner:'' },
-
-    // Search & Product Page — with UX (green blocks)
-    { id:'s1',  teamId:'t3', name:'Auto-suggestion Enhancement',  uxStart:'jul', uxWeek:3, uxDur:4,  devStart:'aug', devWeek:3, devDur:4,  uxDone:false, owner:'' },
-    { id:'s2',  teamId:'t3', name:'Discovery Surface',            uxStart:'aug', uxWeek:1, uxDur:4,  devStart:'aug', devWeek:3, devDur:6,  uxDone:false, owner:'' },
-    { id:'s3',  teamId:'t3', name:'Search Animation',             uxStart:'oct', uxWeek:2, uxDur:3,  devStart:'nov', devWeek:1, devDur:4,  uxDone:false, owner:'' },
-    { id:'s4',  teamId:'t3', name:'All-tab Nightmare',            uxStart:'sep', uxWeek:1, uxDur:6,  devStart:'oct', devWeek:1, devDur:8,  uxDone:false, owner:'' },
-    { id:'s5',  teamId:'t3', name:'PDP Quick Wins',               uxStart:'jul', uxWeek:1, uxDur:4,  devStart:'jun', devWeek:2, devDur:8,  uxDone:false, owner:'' },
-    { id:'s6',  teamId:'t3', name:'Vertical Vision',              uxStart:'aug', uxWeek:1, uxDur:8,  devStart:'nov', devWeek:1, devDur:8,  uxDone:false, owner:'' },
-    { id:'s7',  teamId:'t3', name:'PDP Vision',                   uxStart:'aug', uxWeek:3, uxDur:4,  devStart:'oct', devWeek:1, devDur:12, uxDone:false, owner:'' },
-
-    // Search & Product Page — no UX needed (backlog or dev-only)
-    { id:'s8',  teamId:'t3', name:'Adaptive Search Strategy',     backlog:true, owner:'' },
-    { id:'s9',  teamId:'t3', name:'Branded Search – Performance', backlog:true, owner:'' },
-    { id:'s10', teamId:'t3', name:'Visual Cues',                  backlog:true, owner:'' },
-    { id:'s11', teamId:'t3', name:'North Star Architecture',      backlog:true, owner:'' },
-    { id:'s12', teamId:'t3', name:'Pagination (in & out-store)',  backlog:true, owner:'' },
-    { id:'s13', teamId:'t3', name:'Query Understanding Improv.',  backlog:true, owner:'' },
-    { id:'s14', teamId:'t3', name:'iOS Modernization',            backlog:true, owner:'' },
-    { id:'s15', teamId:'t3', name:'Tech Debts (Android)',         backlog:true, owner:'' },
-    { id:'s16', teamId:'t3', name:'QC Translation',               backlog:true, owner:'' },
-    { id:'s17', teamId:'t3', name:'Buy Box',                      backlog:true, owner:'' },
-  ]
-};
+// Default state is empty — real data always comes from Supabase
+let state = { teams: [], projects: [] };
+let stateLoadedFromRemote = false;
 
 // ── AUTH ──
 const ACCESS_PASSWORD = 'glopi2016';
@@ -610,6 +561,8 @@ function showSaveStatus(msg, color) {
 
 async function saveState(auditAction, auditEntity, auditName, auditDetails) {
   if (!sb) { showSaveStatus('⚠ Supabase not connected', '#e67e22'); return; }
+  if (!stateLoadedFromRemote) { console.warn('[save blocked] state not yet loaded from remote'); return; }
+  if (state.teams.length === 0) { console.warn('[save blocked] refusing to save empty state'); return; }
   showSaveStatus('Saving...', '#aaa');
   const { error } = await sb.from('roadmap_state').upsert({ id: 1, state, updated_at: new Date().toISOString() });
   if (error) { showSaveStatus('✗ Error: ' + error.message, '#e74c3c'); console.error(error); return; }
@@ -1371,7 +1324,7 @@ document.getElementById('f-backlog').addEventListener('change', toggleBacklogUI)
   try {
     document.getElementById('roadmap').innerHTML = '<div style="padding:40px;text-align:center;color:#aaa;font-size:13px;">Loading roadmap...</div>';
     const remote = await loadStateRemote();
-    if (remote) state = remote;
+    if (remote) { state = remote; stateLoadedFromRemote = true; }
   } catch(e) {
     console.warn('Supabase load failed, using default state', e);
   }
